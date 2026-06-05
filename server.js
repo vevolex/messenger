@@ -29,16 +29,30 @@ function getRoomCount(roomName) {
     return room ? room.size : 0;
 }
 
+// YENİ ÖZELLİK: Odadaki kullanıcıların isimlerini listeleyen fonksiyon
+function getRoomUsers(roomName) {
+    const room = io.sockets.adapter.rooms.get(roomName);
+    if (!room) return [];
+    let users = [];
+    for (const socketId of room) {
+        const clientSocket = io.sockets.sockets.get(socketId);
+        if (clientSocket && clientSocket.username) {
+            users.push(clientSocket.username);
+        }
+    }
+    return [...new Set(users)]; // Aynı isimden birden fazla varsa teke düşürür
+}
+
 io.on('connection', (socket) => {
     
-    // Kullanıcı odaya girdiğinde
     socket.on('join_room', (data) => {
         socket.join(data.room);
         socket.username = data.user;
         socket.room = data.room;
         
         io.to(data.room).emit('system_message', `${data.user} sohbete katıldı.`);
-        io.to(data.room).emit('room_stats', { count: getRoomCount(data.room) });
+        // Güncellendi: Artık kullanıcı listesi de gönderiliyor
+        io.to(data.room).emit('room_stats', { count: getRoomCount(data.room), users: getRoomUsers(data.room) });
         
         db.all(`SELECT user, message, time FROM messages WHERE room = ? ORDER BY id ASC`, [data.room], (err, rows) => {
             if (err) return console.log(err.message);
@@ -46,19 +60,17 @@ io.on('connection', (socket) => {
         });
     });
 
-    // ÖZELLİK 1: Odadan Çıkış İstetiği
     socket.on('leave_room', () => {
         if (socket.username && socket.room) {
             const oda = socket.room;
             socket.leave(oda);
             io.to(oda).emit('system_message', `${socket.username} odadan ayrıldı.`);
-            io.to(oda).emit('room_stats', { count: getRoomCount(oda) });
+            io.to(oda).emit('room_stats', { count: getRoomCount(oda), users: getRoomUsers(oda) });
             socket.username = null;
             socket.room = null;
         }
     });
 
-    // Yeni mesaj gönderildiğinde
     socket.on('send_message', (data) => {
         const simdi = new Date();
         const saat = String(simdi.getHours()).padStart(2, '0');
@@ -84,7 +96,7 @@ io.on('connection', (socket) => {
         if (socket.username && socket.room) {
             const oda = socket.room;
             io.to(oda).emit('system_message', `${socket.username} sohbetten ayrıldı.`);
-            io.to(oda).emit('room_stats', { count: getRoomCount(oda) });
+            io.to(oda).emit('room_stats', { count: getRoomCount(oda), users: getRoomUsers(oda) });
         }
     });
 });
