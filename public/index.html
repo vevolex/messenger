@@ -1,0 +1,180 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SaaS Messenger Pro (Database)</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div class="chat-container">
+        <div id="login-area">
+            <h2>Messenger Pro</h2>
+            <input type="text" id="user" placeholder="Kullanıcı Adınız" autocomplete="off">
+            <input type="text" id="room" placeholder="Oda Adı (Örn: teknoloji)" autocomplete="off">
+            <button onclick="baglan()">Sohbete Başla</button>
+        </div>
+
+        <div id="chat-area" style="display:none;">
+            <div class="chat-header">
+                <div class="header-left">
+                    <span id="room-title">Oda: -</span>
+                    <span id="online-count">🟢 0 Çevrimiçi</span>
+                </div>
+                <div class="header-right">
+                    <button id="theme-toggle" onclick="toggleTheme()">🌙 Mode</button>
+                    <span id="user-title">👤 -</span>
+                </div>
+            </div>
+            
+            <div id="messages"></div>
+            
+            <div id="typing-indicator"></div>
+
+            <div class="input-group">
+                <input type="text" id="msg" placeholder="Mesaj veya Resim URL yazın..." autocomplete="off">
+                <button onclick="gonder()">Gönder</button>
+            </div>
+        </div>
+    </div>
+
+    <script src="/socket.io/socket.io.js"></script>
+    <script>
+        const socket = io();
+        let isim, oda;
+        let typingTimeout;
+
+        // İsimden Renk Üretme
+        function isimdenRenkUret(str) {
+            let hash = 0;
+            for (let i = 0; i < str.length; i++) {
+                hash = str.charCodeAt(i) + ((hash << 5) - hash);
+            }
+            const renkler = ['#e53935', '#1e88e5', '#43a047', '#8e24aa', '#d81b60', '#f4511e', '#00acc1', '#3949ab'];
+            return renkler[Math.abs(hash) % renkler.length];
+        }
+
+        // XSS (Güvenlik) Koruması
+        function guvenliMetin(text) {
+            const div = document.createElement('div');
+            div.innerText = text;
+            return div.innerHTML;
+        }
+
+        // Link ve Resimleri Ayıklama
+        function formatMessage(text) {
+            let safeText = guvenliMetin(text);
+            const urlRegex = /(https?:\/\/[^\s]+)/g;
+            
+            return safeText.replace(urlRegex, (url) => {
+                if (url.match(/\.(jpeg|jpg|gif|png|webp)$/i) != null) {
+                    return `<br><img src="${url}" class="chat-img" alt="Görsel" onclick="window.open('${url}', '_blank')"><br>`;
+                }
+                return `<a href="${url}" target="_blank" class="chat-link">${url}</a>`;
+            });
+        }
+
+        // Karanlık/Aydınlık Tema
+        function toggleTheme() {
+            document.body.classList.toggle('dark-theme');
+            const btn = document.getElementById('theme-toggle');
+            btn.innerText = document.body.classList.contains('dark-theme') ? "☀️ Işık" : "🌙 Karanlık";
+        }
+
+        // Odaya Bağlanma
+        function baglan() {
+            isim = document.getElementById('user').value.trim();
+            oda = document.getElementById('room').value.trim();
+            if(!isim || !oda) return alert('Lütfen alanları doldurun!');
+            
+            socket.emit('join_room', { room: oda, user: isim });
+            document.getElementById('room-title').innerText = `📌 ${oda}`;
+            document.getElementById('user-title').innerText = isim;
+            document.getElementById('login-area').style.display = 'none';
+            document.getElementById('chat-area').style.display = 'flex';
+        }
+
+        // Mesaj Gönderme
+        function gonder() {
+            const txt = document.getElementById('msg');
+            if(!txt.value.trim()) return;
+            socket.emit('send_message', { room: oda, user: isim, message: txt.value });
+            txt.value = '';
+            socket.emit('typing', { room: oda, user: isim, isTyping: false });
+        }
+
+        // Yazıyor Özelliği
+        document.getElementById('msg').addEventListener('input', () => {
+            socket.emit('typing', { room: oda, user: isim, isTyping: true });
+            clearTimeout(typingTimeout);
+            typingTimeout = setTimeout(() => {
+                socket.emit('typing', { room: oda, user: isim, isTyping: false });
+            }, 1500);
+        });
+
+        // Enter Tuşu Desteği
+        document.getElementById('msg').addEventListener('keypress', (e) => {
+            if(e.key === 'Enter') gonder();
+        });
+
+        // Ekrana Tek Bir Mesaj Çizdirme Fonksiyonu
+        function mesajiEkranaYazdir(data) {
+            const div = document.getElementById('messages');
+            const msgDiv = document.createElement('div');
+            msgDiv.classList.add('message-wrapper');
+            
+            const userColor = isimdenRenkUret(data.user);
+            const formattedMsg = formatMessage(data.message);
+            
+            if(data.user === isim) {
+                msgDiv.innerHTML = `
+                    <div class="message my-message">
+                        <b style="color: #43a047;">Sen</b>
+                        <p>${formattedMsg}</p>
+                        <span class="time-stamp">${data.time}</span>
+                    </div>`;
+            } else {
+                msgDiv.innerHTML = `
+                    <div class="message other-message">
+                        <b style="color: ${userColor};">${data.user}</b>
+                        <p>${formattedMsg}</p>
+                        <span class="time-stamp">${data.time}</span>
+                    </div>`;
+            }
+            div.appendChild(msgDiv);
+            div.scrollTop = div.scrollHeight;
+        }
+
+        // Odaya Girince Geçmiş Mesajları Al (Database)
+        socket.on('message_history', (rows) => {
+            document.getElementById('messages').innerHTML = ''; 
+            rows.forEach(row => {
+                mesajiEkranaYazdir(row);
+            });
+        });
+
+        // Anlık Yeni Mesaj Geldiğinde
+        socket.on('receive_message', (data) => {
+            mesajiEkranaYazdir(data);
+        });
+
+        // Çevrimiçi Kişi Sayısı Güncellendiğinde
+        socket.on('room_stats', (data) => {
+            document.getElementById('online-count').innerText = `🟢 ${data.count} Çevrimiçi`;
+        });
+
+        // Sistem Mesajı (Giriş/Çıkış)
+        socket.on('system_message', (msg) => {
+            const div = document.getElementById('messages');
+            div.innerHTML += `<div class="system-message">${msg}</div>`;
+            div.scrollTop = div.scrollHeight;
+        });
+
+        // Yazıyor Bildirimi
+        socket.on('user_typing', (data) => {
+            const indicator = document.getElementById('typing-indicator');
+            indicator.innerText = data.isTyping ? `✍️ ${data.user} yazıyor...` : '';
+        });
+    </script>
+</body>
+</html>
