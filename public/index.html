@@ -7,14 +7,34 @@
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
+    <div id="toast-container"></div>
+
     <div id="auth-overlay">
-        <div id="auth-area" class="glass-panel">
-            <h2 id="auth-title">Giriş Yap 👋</h2>
-            <p class="auth-subtitle" id="auth-desc">Sohbete katılmak için bilgilerinizi girin.</p>
-            <div class="input-wrapper"><input type="text" id="auth-user" placeholder="Kullanıcı Adı" autocomplete="off"></div>
-            <div class="input-wrapper"><input type="password" id="auth-pass" placeholder="Şifre" autocomplete="off"></div>
-            <button onclick="authAction()" class="auth-btn" id="auth-btn">Giriş Yap</button>
-            <div class="auth-footer"><p id="auth-toggle-text">Hesabınız yok mu? <a href="#" onclick="toggleAuthMode()">Kayıt Olun</a></p></div>
+        <div class="auth-box glass-panel">
+            <div class="auth-left">
+                <div class="auth-brand">🚀 SaaS Social</div>
+                <h1 class="auth-heading">İletişimin Yeni<br>Boyutunu Keşfedin.</h1>
+                <p class="auth-desc-text">Takımınızla, topluluğunuzla veya arkadaşlarınızla modern, güvenli ve kesintisiz iletişim kurun.</p>
+                <div class="feature-bullets">
+                    <span>✨ Akıllı Mesajlaşma & Sesli İletişim</span>
+                    <span>🎨 Tamamen Kişiselleştirilebilir Profil</span>
+                    <span>🔒 Uçtan Uca Hızlı Soket Mimarisi</span>
+                </div>
+            </div>
+            <div class="auth-right">
+                <h2 id="auth-title">Hoş Geldiniz 👋</h2>
+                <p class="auth-subtitle" id="auth-desc">Devam etmek için giriş yapın.</p>
+                <div class="input-wrapper">
+                    <label>Kullanıcı Adı</label>
+                    <input type="text" id="auth-user" placeholder="Kullanıcı adınızı girin" autocomplete="off">
+                </div>
+                <div class="input-wrapper">
+                    <label>Şifre</label>
+                    <input type="password" id="auth-pass" placeholder="••••••••" autocomplete="off">
+                </div>
+                <button onclick="authAction()" class="auth-btn" id="auth-btn">Giriş Yap</button>
+                <div class="auth-footer"><p id="auth-toggle-text">Hesabınız yok mu? <a href="#" onclick="toggleAuthMode()">Hesap Oluşturun</a></p></div>
+            </div>
         </div>
     </div>
 
@@ -30,8 +50,8 @@
             </div>
             <nav class="menu">
                 <a href="#" onclick="lobiyeDon()" id="nav-lobby" class="active">🏠 Keşfet / Odalar</a>
-                <a href="#" onclick="openSettings()">⚙️ Ayarlar (Yeni)</a>
-                <a href="#" onclick="cikisYap()" class="logout">🚪 Çıkış Yap</a>
+                <a href="#" onclick="openSettings()">⚙️ Gelişmiş Ayarlar</a>
+                <a href="#" onclick="cikisYap()" class="logout">🚪 Oturumu Kapat</a>
             </nav>
         </aside>
 
@@ -59,7 +79,7 @@
                     </div>
                     <div class="header-right" style="display:flex; gap:10px; align-items:center;">
                         <input type="text" id="search-msg" class="search-input" placeholder="🔍 Mesajlarda ara..." onkeyup="mesajAra()">
-                        <button class="action-btn" onclick="odaPaylas()" title="Oda Adını Kopyala">🔗 Paylaş</button>
+                        <button class="action-btn" onclick="odaPaylas()" title="Odayı Paylaş">🔗</button>
                         <span id="online-count">🟢 0 Çevrimiçi</span>
                     </div>
                 </div>
@@ -73,14 +93,14 @@
                 </div>
                 
                 <div id="typing-indicator"></div>
-                <div class="emoji-bar">
-                    <span onclick="emojiEkle('😀')">😀</span><span onclick="emojiEkle('😂')">😂</span>
-                    <span onclick="emojiEkle('🔥')">🔥</span><span onclick="emojiEkle('❤️')">❤️</span>
-                    <span onclick="emojiEkle('👍')">👍</span>
-                </div>
+                
                 <div class="input-group">
+                    <input type="file" id="file-upload" accept="image/*" style="display:none;" onchange="dosyaSecildi(event)">
+                    <button class="media-btn" onclick="document.getElementById('file-upload').click()" title="Fotoğraf Gönder">📎</button>
+                    <button class="media-btn" id="mic-btn" onclick="toggleAudioRecord()" title="Sesli Mesaj (Bas/Durdur)">🎤</button>
+                    
                     <input type="text" id="msg" placeholder="Mesaj yazın (*kalın*, _italik_, ~çizili~)..." autocomplete="off">
-                    <button onclick="gonder()">Gönder</button>
+                    <button onclick="gonder()" class="send-btn">Gönder 🚀</button>
                 </div>
             </div>
         </main>
@@ -104,14 +124,14 @@
                 <input type="text" id="set-bio" placeholder="Kendinizden bahsedin...">
             </div>
             <div class="input-wrapper">
-                <label>Sohbet Duvar Kağıdı (URL) - YENİ</label>
+                <label>Sohbet Duvar Kağıdı (URL)</label>
                 <input type="text" id="set-bg" placeholder="Arka plan resim linki...">
             </div>
             <div class="settings-toggles">
-                <button onclick="toggleTheme()" class="toggle-btn">🌙 Temayı Değiştir</button>
-                <button onclick="toggleMute()" id="mute-btn" class="toggle-btn">🔊 Sesler: Açık</button>
+                <button onclick="toggleTheme()" class="toggle-btn">🌙 Tema</button>
+                <button onclick="toggleMute()" id="mute-btn" class="toggle-btn">🔊 Ses Açık</button>
             </div>
-            <button onclick="saveSettings()" style="width:100%; margin-top:15px;">Kaydet</button>
+            <button onclick="saveSettings()" style="width:100%; margin-top:15px;">Tümünü Kaydet</button>
         </div>
     </div>
 
@@ -131,10 +151,11 @@
         const socket = io();
         let isim = "", oda = "", myAvatarUrl = "", myBio = "";
         let typingTimeout; let isMuted = false; let isLoginMode = true; let replyingTo = null;
-        let lastMsgTime = 0; // Anti-Spam
-        let typingUsers = new Set(); // Çoklu Yazıyor
+        let lastMsgTime = 0; let typingUsers = new Set();
+        
+        // Ses Kaydı Değişkenleri
+        let mediaRecorder; let audioChunks = []; let isRecording = false;
 
-        // YENİ: Başlangıçta LocalStorage Yüklemeleri ve Bildirim İzni
         window.onload = () => {
             if(localStorage.getItem('theme') === 'dark') document.body.classList.add('dark-theme');
             if(localStorage.getItem('mute') === 'true') toggleMute();
@@ -142,12 +163,21 @@
             if(Notification.permission !== "granted" && Notification.permission !== "denied") Notification.requestPermission();
         };
 
+        function showToast(message) {
+            const container = document.getElementById('toast-container');
+            const toast = document.createElement('div');
+            toast.className = 'toast glass-panel'; toast.innerText = message;
+            container.appendChild(toast);
+            setTimeout(() => { toast.style.opacity = '0'; toast.style.transform = 'translateX(100%)'; setTimeout(()=>toast.remove(),300); }, 3500);
+        }
+
         function toggleAuthMode() {
             isLoginMode = !isLoginMode;
-            document.getElementById('auth-title').innerText = isLoginMode ? "Giriş Yap 👋" : "Kayıt Ol 🚀";
+            document.getElementById('auth-title').innerText = isLoginMode ? "Hoş Geldiniz 👋" : "Hesap Oluştur 🚀";
+            document.getElementById('auth-desc').innerText = isLoginMode ? "Devam etmek için giriş yapın." : "Hemen yeni bir hesap oluşturun.";
             document.getElementById('auth-btn').innerText = isLoginMode ? "Giriş Yap" : "Kayıt Ol";
             document.getElementById('auth-toggle-text').innerHTML = isLoginMode 
-                ? 'Hesabınız yok mu? <a href="#" onclick="toggleAuthMode()">Kayıt Olun</a>'
+                ? 'Hesabınız yok mu? <a href="#" onclick="toggleAuthMode()">Hesap Oluşturun</a>'
                 : 'Zaten hesabınız var mı? <a href="#" onclick="toggleAuthMode()">Giriş Yapın</a>';
         }
 
@@ -250,23 +280,16 @@
                 </div>`).join('');
         });
 
-        // YENİ: Arama Özelliği
         function mesajAra() {
             const term = document.getElementById('search-msg').value.toLowerCase();
             document.querySelectorAll('.message-wrapper').forEach(el => {
-                const text = el.querySelector('p').innerText.toLowerCase();
+                const text = el.querySelector('p') ? el.querySelector('p').innerText.toLowerCase() : '';
                 el.style.display = text.includes(term) ? 'flex' : 'none';
             });
         }
 
-        // YENİ: Oda Paylaş Butonu
-        function odaPaylas() {
-            navigator.clipboard.writeText(`Gel sohbet edelim! Oda Adı: ${oda}`);
-            alert("Oda adı ve davet kopyalandı!");
-        }
-
-        // YENİ: Mesaj Kopyalama
-        function kopyala(metin) { navigator.clipboard.writeText(metin); }
+        function odaPaylas() { navigator.clipboard.writeText(`Gel sohbet edelim! Oda Adı: ${oda}`); showToast("Oda adı kopyalandı!"); }
+        function kopyala(metin) { navigator.clipboard.writeText(metin); showToast("Mesaj kopyalandı!"); }
 
         function baslatReply(msgText, msgUser) {
             replyingTo = msgText; document.getElementById('reply-box').style.display = 'flex';
@@ -291,17 +314,53 @@
             localStorage.setItem('mute', isMuted);
             document.getElementById('mute-btn').innerText = isMuted ? "🔇 Sesler: Kapalı" : "🔊 Sesler: Açık"; 
         }
-        function emojiEkle(emoji) { const i = document.getElementById('msg'); i.value += emoji; i.focus(); }
 
-        // YENİ: Markdown, Mention ve Link Kartları
+        // YENİ: Ses Kaydetme (Web Audio API)
+        async function toggleAudioRecord() {
+            const btn = document.getElementById('mic-btn');
+            if(!isRecording) {
+                try {
+                    const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+                    mediaRecorder = new MediaRecorder(stream);
+                    mediaRecorder.ondataavailable = e => audioChunks.push(e.data);
+                    mediaRecorder.onstop = () => {
+                        const audioBlob = new Blob(audioChunks, { type: 'audio/webm' });
+                        const reader = new FileReader(); reader.readAsDataURL(audioBlob);
+                        reader.onloadend = () => {
+                            const base64Audio = reader.result;
+                            socket.emit('send_message', { message: `<audio controls src="${base64Audio}" class="custom-audio"></audio>`, reply_to: replyingTo });
+                        };
+                        audioChunks = [];
+                    };
+                    mediaRecorder.start(); isRecording = true;
+                    btn.style.background = "#ff4757"; btn.style.color = "white"; btn.classList.add('pulse-anim');
+                } catch(err) { alert("Mikrofon izni verilmedi!"); }
+            } else {
+                mediaRecorder.stop(); isRecording = false;
+                btn.style.background = "transparent"; btn.style.color = "inherit"; btn.classList.remove('pulse-anim');
+            }
+        }
+
+        // YENİ: Dosya Yükleme Olayı
+        function dosyaSecildi(event) {
+            const file = event.target.files[0];
+            if(file) {
+                if(file.size > 5000000) return alert("Dosya boyutu 5MB'dan küçük olmalı!");
+                const reader = new FileReader();
+                reader.readAsDataURL(file);
+                reader.onload = function(e) {
+                    const base64Img = e.target.result;
+                    socket.emit('send_message', { message: `<img src="${base64Img}" class="chat-img" onclick="window.open(this.src, '_blank')">`, reply_to: replyingTo });
+                }
+            }
+        }
+
         function formatMessage(text) {
+            if(text.startsWith('<img') || text.startsWith('<audio')) return text; // Medya gönderimiyse Markdown'u es geç
             let safe = document.createElement('div'); safe.innerText = text; let html = safe.innerHTML;
-            // Markdown
             html = html.replace(/\*(.*?)\*/g, '<b>$1</b>').replace(/_(.*?)_/g, '<i>$1</i>').replace(/~(.*?)~/g, '<del>$1</del>');
-            // Mention
             const mentionRegex = new RegExp(`@${isim}\\b`, 'g');
             html = html.replace(mentionRegex, `<span class="mention-highlight">@${isim}</span>`);
-            // Linkler ve Resimler
             return html.replace(/(https?:\/\/[^\s]+)/g, (url) => {
                 if (url.match(/\.(jpeg|jpg|gif|png|webp)$/i) != null) return `<br><img src="${url}" class="chat-img" onclick="window.open('${url}', '_blank')"><br>`;
                 return `<a href="${url}" target="_blank" class="chat-link-card">🔗 Bağlantıya Git</a>`;
@@ -311,10 +370,8 @@
         function gonder() {
             const txt = document.getElementById('msg');
             if(!txt.value.trim()) return;
-            // YENİ: Spam Koruması
-            if(Date.now() - lastMsgTime < 1000) return alert("Çok hızlı yazıyorsunuz, lütfen 1 saniye bekleyin!");
+            if(Date.now() - lastMsgTime < 1000) return showToast("Çok hızlı yazıyorsunuz!");
             lastMsgTime = Date.now();
-
             socket.emit('send_message', { message: txt.value, reply_to: replyingTo });
             txt.value = ''; cancelReply(); socket.emit('typing', { isTyping: false });
         }
@@ -331,23 +388,23 @@
             const userColor = renkUret(data.user);
             const formattedMsg = formatMessage(data.message);
             
-            // YENİ: Jumbo Emoji Kontrolü
-            const isJumbo = /^[\p{Emoji}\s]+$/u.test(data.message.trim());
+            const isMedia = data.message.startsWith('<img') || data.message.startsWith('<audio');
+            const isJumbo = !isMedia && /^[\p{Emoji}\s]+$/u.test(data.message.trim());
             const pClass = isJumbo ? 'class="jumbo-emoji"' : '';
-
-            // YENİ: Mention Vurgusu Arka Planı
             const isMentioned = data.message.includes(`@${isim}`);
             const mentionStyle = isMentioned ? `border: 2px solid #ffb300; background: rgba(255, 179, 0, 0.2);` : ``;
 
             const avatarHtml = data.avatar_url ? `<div class="avatar shadow-sm" onclick="showProfile('${data.user}')"><img src="${data.avatar_url}" class="full-img"></div>` : `<div class="avatar" style="background:${userColor};" onclick="showProfile('${data.user}')">${data.user.charAt(0).toUpperCase()}</div>`;
-            const replyHtml = data.reply_to ? `<div class="reply-block">↪️ ${data.reply_to}</div>` : '';
+            const replyHtml = data.reply_to ? `<div class="reply-block">↪️ ${data.reply_to.replace(/<[^>]*>?/gm, 'Medya')}</div>` : ''; // HTML taglarını temizle
             
-            // YENİ: Kopyala Butonu Eklendi
+            // YENİ: Çift Tik (Okundu İşareti) Sadece Gönderenin Kendisinde Görünür
+            const readMark = data.user === isim ? `<span class="read-receipt">✓✓</span>` : '';
+
             const actionButtons = `
                 <div class="msg-actions">
                     <span onclick="likeMessage(${data.id})" class="action-btn">❤️ <span id="like-count-${data.id}">${data.likes || 0}</span></span>
-                    <span onclick="baslatReply('${data.message.replace(/'/g, "\\'")}', '${data.user}')" class="action-btn">↩️</span>
-                    <span onclick="kopyala('${data.message.replace(/'/g, "\\'")}')" class="action-btn" title="Kopyala">📋</span>
+                    <span onclick="baslatReply('${data.message.replace(/'/g, "\\'").replace(/<[^>]*>?/gm, 'Medya')}', '${data.user}')" class="action-btn">↩️</span>
+                    ${!isMedia ? `<span onclick="kopyala('${data.message.replace(/'/g, "\\'")}')" class="action-btn">📋</span>` : ''}
                 </div>`;
 
             if(data.user === isim) {
@@ -356,7 +413,7 @@
                         ${actionButtons}
                         <div class="message my-message shadow-sm">
                             ${replyHtml} <b>Sen</b> <p ${pClass}>${formattedMsg}</p>
-                            <span class="time-stamp">${data.time}</span>
+                            <span class="time-stamp">${data.time} ${readMark}</span>
                             <span class="delete-icon" onclick="socket.emit('delete_message', ${data.id})">🗑️</span>
                         </div>
                     </div> ${avatarHtml}`;
@@ -382,17 +439,17 @@
             mesajiEkranaYazdir(data);
             if(data.user !== isim && !isMuted) {
                 document.getElementById('notification-sound').play().catch(()=>{});
-                // YENİ: Tarayıcı Bildirimi
                 if (Notification.permission === "granted" && document.hidden) {
-                    new Notification(`Yeni Mesaj - ${data.user}`, { body: data.message, icon: data.avatar_url || 'https://cdn-icons-png.flaticon.com/512/149/149071.png' });
+                    new Notification(`Yeni Mesaj - ${data.user}`, { body: data.message.replace(/<[^>]*>?/gm, 'Yeni Medya'), icon: data.avatar_url || 'https://cdn-icons-png.flaticon.com/512/149/149071.png' });
                 }
             }
         });
 
         socket.on('message_deleted', (msgId) => { const el = document.getElementById(`msg-${msgId}`); if(el) { el.style.opacity = '0'; setTimeout(() => el.remove(), 300); } });
-        socket.on('system_message', (msg) => { const div = document.getElementById('messages'); div.innerHTML += `<div class="system-message">${msg}</div>`; scrollToBottom(); });
+        
+        // YENİ: Sistem Mesajları artık Toast Bildirimi olarak çıkıyor
+        socket.on('system_message', (msg) => { showToast(msg); });
 
-        // YENİ: Çoklu Yazıyor Simülasyonu
         socket.on('user_typing', (data) => {
             if(data.isTyping) typingUsers.add(data.user); else typingUsers.delete(data.user);
             const ind = document.getElementById('typing-indicator');
@@ -401,10 +458,8 @@
             else ind.innerText = `✍️ ${[...typingUsers].join(', ')} yazıyor...`;
         });
 
-        // YENİ: Scroll To Bottom Mantığı
         function checkScroll() {
-            const div = document.getElementById('messages');
-            const btn = document.getElementById('scroll-bottom-btn');
+            const div = document.getElementById('messages'); const btn = document.getElementById('scroll-bottom-btn');
             if(div.scrollTop < div.scrollHeight - div.clientHeight - 100) btn.style.display = 'block'; else btn.style.display = 'none';
         }
         function scrollToBottom() { const div = document.getElementById('messages'); div.scrollTop = div.scrollHeight; }

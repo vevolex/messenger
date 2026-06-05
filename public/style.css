@@ -1,12 +1,12 @@
-@import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap');
 
 :root {
     --bg-color1: #a18cd1; --bg-color2: #fbc2eb; --bg-color3: #8fd3f4;
-    --glass-bg: rgba(255, 255, 255, 0.55); --glass-border: rgba(255, 255, 255, 0.4);
+    --glass-bg: rgba(255, 255, 255, 0.6); --glass-border: rgba(255, 255, 255, 0.4);
     --text-main: #2d3436; --text-muted: #636e72;
     --msg-mine-bg: linear-gradient(135deg, #6a11cb 0%, #2575fc 100%); --msg-mine-text: #ffffff;
     --msg-other-bg: rgba(255, 255, 255, 0.85); --msg-other-text: #2d3436;
-    --input-bg: rgba(255, 255, 255, 0.7); --shadow-color: rgba(31, 38, 135, 0.1);
+    --input-bg: rgba(255, 255, 255, 0.8); --shadow-color: rgba(31, 38, 135, 0.15);
     --sidebar-w: 280px; --right-w: 240px;
 }
 
@@ -15,7 +15,7 @@ body.dark-theme {
     --glass-bg: rgba(24, 28, 36, 0.7); --glass-border: rgba(255, 255, 255, 0.1);
     --text-main: #dfe6e9; --text-muted: #b2bec3;
     --msg-mine-bg: linear-gradient(135deg, #00c6ff 0%, #0072ff 100%); --msg-mine-text: #ffffff;
-    --msg-other-bg: rgba(255, 255, 255, 0.12); --msg-other-text: #dfe6e9;
+    --msg-other-bg: rgba(255, 255, 255, 0.15); --msg-other-text: #dfe6e9;
     --input-bg: rgba(0, 0, 0, 0.3);
 }
 
@@ -27,14 +27,34 @@ body {
 @keyframes gradientBG { 0% { background-position: 0% 50%; } 50% { background-position: 100% 50%; } 100% { background-position: 0% 50%; } }
 
 .glass-panel { background: var(--glass-bg); backdrop-filter: blur(16px); -webkit-backdrop-filter: blur(16px); border: 1px solid var(--glass-border); border-radius: 20px; box-shadow: 0 8px 32px 0 var(--shadow-color); }
-#auth-overlay { position: fixed; top:0; left:0; width:100%; height:100%; display:flex; justify-content:center; align-items:center; z-index:9999; }
-#auth-area { padding: 40px; width: 330px; text-align: center; }
+
+/* PREMIUM SPLIT-SCREEN GİRİŞ EKRANI */
+#auth-overlay { position: fixed; top:0; left:0; width:100%; height:100%; display:flex; justify-content:center; align-items:center; z-index:9999; padding: 20px; box-sizing: border-box; }
+.auth-box { display: flex; max-width: 900px; width: 100%; border-radius: 24px; overflow: hidden; min-height: 500px; box-shadow: 0 20px 50px rgba(0,0,0,0.2); }
+.auth-left { flex: 1.2; background: linear-gradient(135deg, rgba(106, 17, 203, 0.8), rgba(37, 117, 252, 0.8)); padding: 50px; color: white; display: flex; flex-direction: column; justify-content: center; position: relative; overflow: hidden; }
+.auth-left::after { content: ''; position: absolute; width: 300px; height: 300px; background: rgba(255,255,255,0.1); border-radius: 50%; top: -50px; right: -50px; }
+.auth-brand { font-size: 14px; font-weight: 600; letter-spacing: 2px; text-transform: uppercase; margin-bottom: auto; }
+.auth-heading { font-size: 36px; line-height: 1.2; font-weight: 700; margin-bottom: 20px; z-index: 1; }
+.auth-desc-text { font-size: 15px; opacity: 0.9; margin-bottom: 30px; line-height: 1.6; z-index: 1; }
+.feature-bullets { display: flex; flex-direction: column; gap: 12px; z-index: 1; }
+.feature-bullets span { background: rgba(0,0,0,0.2); padding: 10px 15px; border-radius: 12px; font-size: 13px; font-weight: 500; border: 1px solid rgba(255,255,255,0.1); backdrop-filter: blur(5px); }
+.auth-right { flex: 1; padding: 50px 40px; display: flex; flex-direction: column; justify-content: center; background: var(--glass-bg); }
+.auth-right h2 { margin-bottom: 5px; font-size: 28px; }
+.auth-subtitle { color: var(--text-muted); margin-bottom: 30px; font-size: 14px; }
+.auth-btn { background: linear-gradient(135deg, #6a11cb 0%, #2575fc 100%); width: 100%; margin-top: 20px; font-size: 16px; padding: 15px; border-radius: 12px; transition: transform 0.2s, box-shadow 0.2s; }
+.auth-btn:hover { transform: translateY(-2px); box-shadow: 0 10px 20px rgba(37, 117, 252, 0.3); }
+.auth-footer { text-align: center; margin-top: 20px; font-size: 13px; color: var(--text-muted); }
+.auth-footer a { color: #2575fc; font-weight: 600; text-decoration: none; }
+
+/* YENİ: TOAST BİLDİRİMLERİ */
+#toast-container { position: fixed; top: 20px; right: 20px; display: flex; flex-direction: column; gap: 10px; z-index: 99999; }
+.toast { padding: 12px 20px; font-size: 13px; font-weight: 500; border-left: 4px solid #2575fc; animation: slideIn 0.3s ease; transition: all 0.3s ease; }
+@keyframes slideIn { from{ transform: translateX(100%); opacity: 0; } to{ transform: translateX(0); opacity: 1; } }
 
 .app-layout { display: flex; width: 95vw; height: 90vh; gap: 15px; max-width: 1400px; }
 .sidebar { width: var(--sidebar-w); padding: 20px; display: flex; flex-direction: column; gap: 20px; }
 .brand { font-size: 22px; font-weight: 600; text-align: center; border-bottom: 1px solid var(--glass-border); padding-bottom: 15px; }
 
-/* YENİ: Avatar Noktası Konteyneri */
 .avatar-container { position: relative; display: inline-block; }
 .online-dot { position: absolute; bottom: 0; right: 0; width: 12px; height: 12px; background-color: #00e676; border-radius: 50%; border: 2px solid white; box-shadow: 0 0 5px rgba(0,230,118,0.5); animation: pulse 2s infinite; }
 @keyframes pulse { 0% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(0, 230, 118, 0.7); } 70% { transform: scale(1); box-shadow: 0 0 0 6px rgba(0, 230, 118, 0); } 100% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(0, 230, 118, 0); } }
@@ -49,7 +69,6 @@ body {
 .menu a:hover, .menu a.active { background: rgba(255,255,255,0.2); transform: translateX(3px); }
 .menu a.logout { color: #ff7675; margin-top: auto; }
 
-/* YENİ: Arka Plan Resmi Desteği */
 .main-content { flex: 1; display: flex; flex-direction: column; overflow: hidden; position: relative; background-size: cover; background-position: center; background-blend-mode: overlay; }
 .chat-header { padding: 15px 25px; border-bottom: 1px solid var(--glass-border); display: flex; justify-content: space-between; align-items: center; font-weight: 600; background: var(--glass-bg); backdrop-filter: blur(10px); z-index: 10; }
 .dashboard-content { padding: 25px; overflow-y: auto; height: 100%; }
@@ -65,8 +84,7 @@ body {
 .user-item { display: flex; align-items: center; gap: 10px; padding: 10px; cursor: pointer; border-radius: 12px; transition: background 0.2s; }
 .user-item:hover { background: rgba(255,255,255,0.15); }
 
-/* YENİ: Arama Kutusu CSS */
-.search-input { padding: 6px 12px; border-radius: 20px; border: 1px solid var(--glass-border); background: var(--input-bg); font-size: 12px; width: 140px; color: var(--text-main); }
+.search-input { padding: 8px 15px; border-radius: 20px; border: 1px solid var(--glass-border); background: var(--input-bg); font-size: 12px; width: 140px; color: var(--text-main); }
 input { padding: 12px 18px; border: 1px solid var(--glass-border); border-radius: 12px; background: var(--input-bg); color: var(--text-main); font-family: inherit; outline: none; box-sizing: border-box; }
 input:focus { border-color: #6a11cb; }
 button { padding: 12px 20px; background: var(--msg-mine-bg); color: white; border: none; border-radius: 12px; font-weight: 600; cursor: pointer; transition: opacity 0.2s; }
@@ -82,13 +100,18 @@ button:hover { opacity: 0.9; }
 .other-message { background: var(--msg-other-bg); color: var(--msg-other-text); border-bottom-left-radius: 4px; }
 .message b { font-size: 11px; opacity: 0.75; display: block; margin-bottom: 3px; }
 .message p { margin: 0; }
-.time-stamp { font-size: 9px; opacity: 0.6; float: right; margin-top: 6px; margin-left: 10px; }
+.time-stamp { font-size: 9px; opacity: 0.6; float: right; margin-top: 6px; margin-left: 10px; display:flex; align-items:center; gap:3px;}
 
-/* YENİ: Vurgu, Emoji, Link Kartları ve Markdown Stilleri */
+/* YENİ: Görüldü İşareti (Çift Tik) */
+.read-receipt { font-size: 10px; color: #76d275; font-weight: bold; letter-spacing: -2px; }
+
 .jumbo-emoji { font-size: 40px !important; line-height: 1.2; text-align: center; }
 .mention-highlight { background: #ffb300; color: #000; padding: 2px 6px; border-radius: 6px; font-weight: bold; }
 .chat-link-card { display: inline-block; margin-top: 5px; background: rgba(0,0,0,0.1); padding: 8px 12px; border-radius: 8px; text-decoration: none; font-weight: bold; font-size: 12px; border: 1px solid var(--glass-border); transition: background 0.2s; }
 .chat-link-card:hover { background: rgba(0,0,0,0.2); }
+
+/* YENİ: Ses Oynatıcı Stili */
+.custom-audio { height: 35px; border-radius: 20px; outline: none; margin-top: 5px; }
 
 .avatar, .avatar-small-chat { width: 38px; height: 38px; border-radius: 50%; display: flex; justify-content: center; align-items: center; color: white; font-weight: bold; font-size: 14px; flex-shrink: 0; overflow: hidden; cursor: pointer; }
 .avatar-small { width: 40px; height: 40px; border-radius: 50%; display: flex; justify-content: center; align-items: center; font-size: 18px; }
@@ -105,25 +128,27 @@ button:hover { opacity: 0.9; }
 .delete-icon { position: absolute; top: -8px; right: -8px; background: #ff7675; color: white; border-radius: 50%; padding: 3px; font-size: 9px; cursor: pointer; display: none; }
 .message:hover .delete-icon { display: block; }
 
-.input-group { display: flex; padding: 20px 25px; gap: 10px; background: var(--glass-bg); border-top: 1px solid var(--glass-border); z-index: 10; backdrop-filter: blur(10px); }
-.input-group input { flex: 1; border-radius: 20px; }
-.input-group button { border-radius: 20px; padding: 12px 25px; }
+.input-group { display: flex; padding: 15px 25px; gap: 10px; background: var(--glass-bg); border-top: 1px solid var(--glass-border); z-index: 10; backdrop-filter: blur(10px); align-items:center;}
+.input-group input[type="text"] { flex: 1; border-radius: 20px; }
+.send-btn { border-radius: 20px; padding: 12px 25px; }
 
-.emoji-bar { padding: 5px 25px; display: flex; gap: 12px; font-size: 18px; background: var(--glass-bg); }
-.emoji-bar span { cursor: pointer; }
+/* YENİ: Medya Butonları */
+.media-btn { background: transparent; border: 1px solid var(--glass-border); color: var(--text-main); font-size: 18px; border-radius: 50%; width: 45px; height: 45px; display: flex; justify-content: center; align-items: center; padding: 0; transition: all 0.3s; }
+.media-btn:hover { background: rgba(0,0,0,0.05); transform: scale(1.1); }
+.pulse-anim { animation: micPulse 1s infinite; }
+@keyframes micPulse { 0% { transform: scale(1); box-shadow: 0 0 0 0 rgba(255, 71, 87, 0.7); } 70% { transform: scale(1.1); box-shadow: 0 0 0 10px rgba(255, 71, 87, 0); } 100% { transform: scale(1); box-shadow: 0 0 0 0 rgba(255, 71, 87, 0); } }
+
 #typing-indicator { font-size: 11px; padding: 0 25px; font-style: italic; opacity: 0.7; height: 15px; background: var(--glass-bg); }
-.system-message { align-self: center; background: rgba(255,255,255,0.1); font-size: 10.5px; padding: 4px 12px; border-radius: 20px; border: 1px solid var(--glass-border); }
-.chat-img { max-width: 180px; border-radius: 10px; margin-top: 5px; cursor: pointer; }
+.chat-img { max-width: 250px; border-radius: 12px; margin-top: 5px; cursor: pointer; box-shadow: 0 4px 10px rgba(0,0,0,0.1); }
 
-/* YENİ: Aşağı Kaydır Butonu */
 #scroll-bottom-btn { position: absolute; bottom: 100px; right: 30px; width: 45px; height: 45px; border-radius: 50%; background: var(--glass-bg); border: 1px solid var(--glass-border); font-size: 20px; display: flex; justify-content: center; align-items: center; cursor: pointer; box-shadow: 0 4px 10px rgba(0,0,0,0.2); z-index: 100; transition: transform 0.2s; padding: 0;}
 #scroll-bottom-btn:hover { transform: translateY(3px); }
 
 .modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.4); justify-content: center; align-items: center; z-index: 99999; }
 .modal-content { padding: 30px; width: 360px; position: relative; }
 .close { position: absolute; top: 15px; right: 20px; font-size: 22px; cursor: pointer; opacity: 0.6; }
-.input-wrapper { display: flex; flex-direction: column; gap: 5px; margin-bottom: 15px; text-align: left; }
-.input-wrapper label { font-size: 11px; font-weight: 500; opacity: 0.8; }
+.input-wrapper { display: flex; flex-direction: column; gap: 8px; margin-bottom: 18px; text-align: left; }
+.input-wrapper label { font-size: 12px; font-weight: 600; opacity: 0.8; }
 .settings-toggles { display: flex; gap: 10px; }
 .toggle-btn { flex: 1; background: rgba(255,255,255,0.1); color: var(--text-main); border: 1px solid var(--glass-border); }
 
