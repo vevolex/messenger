@@ -2,7 +2,7 @@ const express = require('express');
 const http = require('http');
 const { Server } = require('socket.io');
 const path = require('path');
-const sqlite3 = require('sqlite3').verbose(); // Veritabanı modülünü dahil ettik
+const sqlite3 = require('sqlite3').verbose();
 
 const app = express();
 const server = http.createServer(app);
@@ -14,7 +14,6 @@ const db = new sqlite3.Database('./chat.db', (err) => {
     console.log('📦 SQLite veritabanı aktif.');
 });
 
-// Mesajların tutulacağı 'messages' tablosunu oluştur (Eğer yoksa)
 db.run(`CREATE TABLE IF NOT EXISTS messages (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
     room TEXT,
@@ -37,19 +36,26 @@ io.on('connection', (socket) => {
         socket.join(data.room);
         socket.username = data.user;
         socket.room = data.room;
-
+        
+        io.to(data.room).emit('system_message', `${data.user} sohbete katıldı.`);
         io.to(data.room).emit('room_stats', { count: getRoomCount(data.room) });
-        socket.to(data.room).emit('system_message', `${data.user} sohbete katıldı.`);
-
-        // ESKİ MESAJLARI GETİR: Odaya ait geçmiş mesajları veritabanından çek
-        db.all("SELECT * FROM messages WHERE room = ? ORDER BY id ASC", [data.room], (err, rows) => {
-            if (err) {
-                console.error(err);
-                return;
-            }
-            // Çekilen eski mesajları sadece odaya yeni giren kişiye gönder
+        
+        db.all(`SELECT user, message, time FROM messages WHERE room = ? ORDER BY id ASC`, [data.room], (err, rows) => {
+            if (err) return console.log(err.message);
             socket.emit('message_history', rows);
         });
+    });
+
+    // ÖZELLİK 1: Odadan Çıkış İstetiği
+    socket.on('leave_room', () => {
+        if (socket.username && socket.room) {
+            const oda = socket.room;
+            socket.leave(oda);
+            io.to(oda).emit('system_message', `${socket.username} odadan ayrıldı.`);
+            io.to(oda).emit('room_stats', { count: getRoomCount(oda) });
+            socket.username = null;
+            socket.room = null;
+        }
     });
 
     // Yeni mesaj gönderildiğinde
@@ -61,13 +67,10 @@ io.on('connection', (socket) => {
 
         const msgData = { ...data, time: timeStr };
 
-        // MESAJI VERİTABANINA KAYDET
         db.run(`INSERT INTO messages (room, user, message, time) VALUES (?, ?, ?, ?)`, 
             [data.room, data.user, data.message, timeStr], 
             function(err) {
                 if (err) return console.log(err.message);
-                
-                // Veritabanına başarıyla kaydedildikten sonra odadaki herkese ilet
                 io.to(data.room).emit('receive_message', msgData);
             }
         );
@@ -86,7 +89,7 @@ io.on('connection', (socket) => {
     });
 });
 
-const PORT = 3000;
+const PORT = process.env.PORT || 3000;
 server.listen(PORT, () => {
-    console.log(`🚀 Database Destekli Messenger hazır: http://localhost:${PORT}`);
+    console.log(`🚀 Sunucu http://localhost:${PORT} adresinde çalışıyor`);
 });
