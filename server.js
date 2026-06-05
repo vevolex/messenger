@@ -6,7 +6,8 @@ const sqlite3 = require('sqlite3').verbose();
 
 const app = express();
 const server = http.createServer(app);
-const io = new Server(server);
+// YENİ: Ses ve resim dosyaları için soket limitini 50MB'a çıkardık
+const io = new Server(server, { maxHttpBufferSize: 5e7 }); 
 
 // 📦 VERİTABANI BAĞLANTISI VE TABLO OLUŞTURMA
 const db = new sqlite3.Database('./chat.db', (err) => {
@@ -18,12 +19,12 @@ db.serialize(() => {
     db.run(`CREATE TABLE IF NOT EXISTS messages (id INTEGER PRIMARY KEY AUTOINCREMENT, room TEXT, user TEXT, message TEXT, time TEXT)`);
     db.run(`CREATE TABLE IF NOT EXISTS users (id INTEGER PRIMARY KEY AUTOINCREMENT, username TEXT UNIQUE, password TEXT)`);
 
-    // GÜVENLİ SÜTUN EKLEMELERİ (Yeni Özellikler İçin)
+    // GÜVENLİ SÜTUN EKLEMELERİ
     db.run(`ALTER TABLE users ADD COLUMN bio TEXT`, (err) => {});
     db.run(`ALTER TABLE users ADD COLUMN avatar_url TEXT`, (err) => {});
     db.run(`ALTER TABLE messages ADD COLUMN likes INTEGER DEFAULT 0`, (err) => {});
     db.run(`ALTER TABLE messages ADD COLUMN reply_to TEXT`, (err) => {});
-    db.run(`ALTER TABLE users ADD COLUMN last_seen TEXT`, (err) => {}); // Yeni: Son Görülme
+    db.run(`ALTER TABLE users ADD COLUMN last_seen TEXT`, (err) => {});
 });
 
 app.use(express.static(path.join(__dirname, 'public')));
@@ -53,7 +54,6 @@ function getActiveRooms() {
 }
 
 io.on('connection', (socket) => {
-    
     socket.on('register', (data) => {
         db.run(`INSERT INTO users (username, password, bio, avatar_url, last_seen) VALUES (?, ?, ?, ?, ?)`, 
         [data.username, data.password, 'Merhaba! Ben de buradayım.', '', 'Şu an aktif'], function(err) {
@@ -90,7 +90,7 @@ io.on('connection', (socket) => {
 
     socket.on('join_room', (data) => {
         socket.join(data.room); socket.room = data.room;
-        io.to(data.room).emit('system_message', `${socket.username} katıldı.`);
+        io.to(data.room).emit('system_message', `👋 ${socket.username} odaya katıldı.`);
         io.to(data.room).emit('room_stats', { count: getRoomCount(data.room), users: getRoomUsers(data.room) });
         io.emit('lobby_list', getActiveRooms()); 
         
@@ -104,7 +104,7 @@ io.on('connection', (socket) => {
     socket.on('leave_room', () => {
         if (socket.username && socket.room) {
             const oda = socket.room; socket.leave(oda);
-            io.to(oda).emit('system_message', `${socket.username} ayrıldı.`);
+            io.to(oda).emit('system_message', `🚶 ${socket.username} odadan ayrıldı.`);
             io.to(oda).emit('room_stats', { count: getRoomCount(oda), users: getRoomUsers(oda) });
             socket.room = null; io.emit('lobby_list', getActiveRooms());
         }
@@ -148,7 +148,7 @@ io.on('connection', (socket) => {
         }
         if (socket.username && socket.room) {
             const oda = socket.room;
-            io.to(oda).emit('system_message', `${socket.username} çıkış yaptı.`);
+            io.to(oda).emit('system_message', `🔌 ${socket.username} bağlantıyı kesti.`);
             io.to(oda).emit('room_stats', { count: getRoomCount(oda), users: getRoomUsers(oda) });
             io.emit('lobby_list', getActiveRooms());
         }
