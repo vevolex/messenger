@@ -3,13 +3,13 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>SaaS Messenger Pro (Database)</title>
+    <title>SaaS Messenger Premium</title>
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
     <div class="chat-container">
         <div id="login-area">
-            <h2>Messenger Pro</h2>
+            <h2>Messenger Premium</h2>
             <input type="text" id="user" placeholder="Kullanıcı Adınız" autocomplete="off">
             <input type="text" id="room" placeholder="Oda Adı (Örn: teknoloji)" autocomplete="off">
             <button onclick="baglan()">Sohbete Başla</button>
@@ -38,13 +38,14 @@
         </div>
     </div>
 
+    <audio id="notification-sound" src="https://cdn.pixabay.com/download/audio/2021/08/04/audio_0625c1539c.mp3" preload="auto"></audio>
+
     <script src="/socket.io/socket.io.js"></script>
     <script>
         const socket = io();
         let isim, oda;
         let typingTimeout;
 
-        // İsimden Renk Üretme
         function isimdenRenkUret(str) {
             let hash = 0;
             for (let i = 0; i < str.length; i++) {
@@ -54,18 +55,15 @@
             return renkler[Math.abs(hash) % renkler.length];
         }
 
-        // XSS (Güvenlik) Koruması
         function guvenliMetin(text) {
             const div = document.createElement('div');
             div.innerText = text;
             return div.innerHTML;
         }
 
-        // Link ve Resimleri Ayıklama
         function formatMessage(text) {
             let safeText = guvenliMetin(text);
             const urlRegex = /(https?:\/\/[^\s]+)/g;
-            
             return safeText.replace(urlRegex, (url) => {
                 if (url.match(/\.(jpeg|jpg|gif|png|webp)$/i) != null) {
                     return `<br><img src="${url}" class="chat-img" alt="Görsel" onclick="window.open('${url}', '_blank')"><br>`;
@@ -74,14 +72,12 @@
             });
         }
 
-        // Karanlık/Aydınlık Tema
         function toggleTheme() {
             document.body.classList.toggle('dark-theme');
             const btn = document.getElementById('theme-toggle');
             btn.innerText = document.body.classList.contains('dark-theme') ? "☀️ Işık" : "🌙 Karanlık";
         }
 
-        // Odaya Bağlanma
         function baglan() {
             isim = document.getElementById('user').value.trim();
             oda = document.getElementById('room').value.trim();
@@ -94,7 +90,6 @@
             document.getElementById('chat-area').style.display = 'flex';
         }
 
-        // Mesaj Gönderme
         function gonder() {
             const txt = document.getElementById('msg');
             if(!txt.value.trim()) return;
@@ -103,7 +98,6 @@
             socket.emit('typing', { room: oda, user: isim, isTyping: false });
         }
 
-        // Yazıyor Özelliği
         document.getElementById('msg').addEventListener('input', () => {
             socket.emit('typing', { room: oda, user: isim, isTyping: true });
             clearTimeout(typingTimeout);
@@ -112,12 +106,10 @@
             }, 1500);
         });
 
-        // Enter Tuşu Desteği
         document.getElementById('msg').addEventListener('keypress', (e) => {
             if(e.key === 'Enter') gonder();
         });
 
-        // Ekrana Tek Bir Mesaj Çizdirme Fonksiyonu
         function mesajiEkranaYazdir(data) {
             const div = document.getElementById('messages');
             const msgDiv = document.createElement('div');
@@ -145,7 +137,6 @@
             div.scrollTop = div.scrollHeight;
         }
 
-        // Odaya Girince Geçmiş Mesajları Al (Database)
         socket.on('message_history', (rows) => {
             document.getElementById('messages').innerHTML = ''; 
             rows.forEach(row => {
@@ -153,24 +144,25 @@
             });
         });
 
-        // Anlık Yeni Mesaj Geldiğinde
         socket.on('receive_message', (data) => {
             mesajiEkranaYazdir(data);
+            
+            if(data.user !== isim) {
+                const sound = document.getElementById('notification-sound');
+                sound.play().catch(e => console.log("Otomatik ses çalma engellendi."));
+            }
         });
 
-        // Çevrimiçi Kişi Sayısı Güncellendiğinde
         socket.on('room_stats', (data) => {
             document.getElementById('online-count').innerText = `🟢 ${data.count} Çevrimiçi`;
         });
 
-        // Sistem Mesajı (Giriş/Çıkış)
         socket.on('system_message', (msg) => {
             const div = document.getElementById('messages');
             div.innerHTML += `<div class="system-message">${msg}</div>`;
             div.scrollTop = div.scrollHeight;
         });
 
-        // Yazıyor Bildirimi
         socket.on('user_typing', (data) => {
             const indicator = document.getElementById('typing-indicator');
             indicator.innerText = data.isTyping ? `✍️ ${data.user} yazıyor...` : '';
