@@ -8,7 +8,7 @@
 </head>
 <body>
     <div id="auth-overlay">
-        <div id="auth-area">
+        <div id="auth-area" class="glass-panel">
             <h2 id="auth-title">Giriş Yap 👋</h2>
             <p class="auth-subtitle" id="auth-desc">Sohbete katılmak için bilgilerinizi girin.</p>
             <div class="input-wrapper"><input type="text" id="auth-user" placeholder="Kullanıcı Adı" autocomplete="off"></div>
@@ -20,36 +20,38 @@
 
     <div class="app-layout" id="app-layout" style="display:none;">
         
-        <aside class="sidebar">
-            <div class="brand">🚀 SaaS App</div>
+        <aside class="sidebar glass-panel">
+            <div class="brand">🚀 SaaS Social</div>
+            
             <div class="user-info-card" onclick="openSettings()">
-                <div class="avatar" id="my-avatar" style="background:#1e88e5;">?</div>
+                <div class="avatar" id="my-avatar">?</div>
                 <div class="info">
-                    <strong id="my-username">Kullanıcı</strong>
+                    <strong id="my-username">Yükleniyor...</strong>
                     <span id="my-bio">Profili Düzenle</span>
                 </div>
             </div>
+            
             <nav class="menu">
-                <a href="#" onclick="lobiyeDon()" id="nav-lobby" class="active">🏠 Lobi / Akış</a>
-                <a href="#" onclick="openSettings()">⚙️ Ayarlar</a>
-                <a href="#" onclick="cikisYap()" class="logout">🚪 Çıkış Yap</a>
+                <a href="#" onclick="lobiyeDon()" id="nav-lobby" class="active">🏠 Keşfet / Odalar</a>
+                <a href="#" onclick="openSettings()">⚙️ Gelişmiş Ayarlar</a>
+                <a href="#" onclick="cikisYap()" class="logout">🚪 Oturumu Kapat</a>
             </nav>
         </aside>
 
-        <main class="main-content">
+        <main class="main-content glass-panel">
             <div id="dashboard-area">
                 <div class="chat-header">
-                    <span id="welcome-title">Keşfet & Odalar</span>
+                    <span>🔥 Trend Odaları Keşfet</span>
                 </div>
                 <div class="dashboard-content">
-                    <div class="create-post-box">
-                        <img src="https://cdn-icons-png.flaticon.com/512/149/149071.png" id="post-avatar" class="avatar-small">
-                        <div class="input-group" style="border:none; padding:0; flex:1;">
-                            <input type="text" id="room-input" placeholder="Yeni bir odaya katıl veya oluştur..." autocomplete="off">
-                            <button onclick="odayaKatil()">Oluştur</button>
+                    <div class="create-post-box glass-panel">
+                        <div class="avatar-small" id="post-avatar-placeholder">✍️</div>
+                        <div class="input-group-clean">
+                            <input type="text" id="room-input" placeholder="Yeni bir oda ismi yazın veya bulun..." autocomplete="off">
+                            <button onclick="odayaKatil()">Odaya Gir</button>
                         </div>
                     </div>
-                    <h3>🔥 Trend Odalar</h3>
+                    <h3>Aktif Topluluklar</h3>
                     <div id="active-rooms" class="room-list"></div>
                 </div>
             </div>
@@ -57,62 +59,65 @@
             <div id="chat-area" style="display:none; height:100%; flex-direction:column;">
                 <div class="chat-header">
                     <div class="header-left">
+                        <button onclick="lobiyeDon()" class="back-btn">⬅ Odadan Çık</button>
                         <span id="room-title">Oda: -</span>
-                        <span id="online-count">🟢 0 Çevrimiçi</span>
                     </div>
+                    <span id="online-count">🟢 0 Çevrimiçi</span>
                 </div>
                 
                 <div id="messages"></div>
                 
-                <div id="reply-box" style="display:none;">
-                    <span>↩️ Yanıtlanıyor: <strong id="reply-user"></strong></span>
-                    <button onclick="cancelReply()">✖</button>
+                <div id="reply-box" class="glass-panel" style="display:none;">
+                    <span>↩️ <strong id="reply-user"></strong> kullanıcısına yanıt veriliyor...</span>
+                    <button onclick="cancelReply()">✖ Cancel</button>
                 </div>
                 
                 <div id="typing-indicator"></div>
+                
                 <div class="emoji-bar">
                     <span onclick="emojiEkle('😀')">😀</span><span onclick="emojiEkle('😂')">😂</span>
                     <span onclick="emojiEkle('🔥')">🔥</span><span onclick="emojiEkle('❤️')">❤️</span>
                     <span onclick="emojiEkle('👍')">👍</span><span onclick="emojiEkle('🚀')">🚀</span>
                 </div>
+                
                 <div class="input-group">
-                    <input type="text" id="msg" placeholder="Mesaj yazın..." autocomplete="off">
+                    <input type="text" id="msg" placeholder="Mesajınızı buraya yazın..." autocomplete="off">
                     <button onclick="gonder()">Gönder</button>
                 </div>
             </div>
         </main>
 
-        <aside class="right-sidebar" id="right-sidebar" style="display:none;">
-            <h3>👥 Odadaki Kişiler</h3>
+        <aside class="right-sidebar glass-panel" id="right-sidebar" style="display:none;">
+            <h3>👥 Çevrimiçi Üyeler</h3>
             <div id="users-list" class="users-list"></div>
         </aside>
     </div>
 
     <div id="settings-modal" class="modal">
-        <div class="modal-content">
+        <div class="modal-content glass-panel">
             <span class="close" onclick="closeSettings()">&times;</span>
-            <h2>⚙️ Profil ve Ayarlar</h2>
+            <h2>⚙️ Gelişmiş Ayarlar</h2>
             <div class="input-wrapper">
-                <label>Profil Fotoğrafı (URL)</label>
-                <input type="text" id="set-avatar" placeholder="https://...">
+                <label>Profil Fotoğrafı Linki (URL)</label>
+                <input type="text" id="set-avatar" placeholder="https://resimlinki.com/avatar.jpg">
             </div>
             <div class="input-wrapper">
-                <label>Hakkımda (Bio)</label>
+                <label>Hakkımda (Biyografi)</label>
                 <input type="text" id="set-bio" placeholder="Kendinizden bahsedin...">
             </div>
             <div class="settings-toggles">
-                <button onclick="toggleTheme()" class="toggle-btn">🌙 Tema Değiştir</button>
-                <button onclick="toggleMute()" id="mute-btn" class="toggle-btn">🔊 Ses Açık</button>
+                <button onclick="toggleTheme()" class="toggle-btn">🌙 Temayı Değiştir</button>
+                <button onclick="toggleMute()" id="mute-btn" class="toggle-btn">🔊 Sesler: Açık</button>
             </div>
-            <button onclick="saveSettings()" style="width:100%; margin-top:15px;">Kaydet</button>
+            <button onclick="saveSettings()" style="width:100%; margin-top:20px; border-radius: 12px;">Ayarları Güncelle</button>
         </div>
     </div>
 
     <div id="profile-popup" class="modal">
-        <div class="modal-content profile-card">
+        <div class="modal-content glass-panel profile-card">
             <span class="close" onclick="document.getElementById('profile-popup').style.display='none'">&times;</span>
-            <img id="pop-avatar" src="" alt="Avatar" class="profile-large-avatar">
-            <h2 id="pop-username">Kullanıcı</h2>
+            <div id="pop-avatar-box" class="profile-large-avatar"></div>
+            <h2 id="pop-username">Kullanıcı Adı</h2>
             <p id="pop-bio">Biyografi yükleniyor...</p>
         </div>
     </div>
@@ -129,9 +134,9 @@
         let typingTimeout;
         let isMuted = false;
         let isLoginMode = true;
-        let replyingTo = null; // Yanıt sistemi için
+        let replyingTo = null;
 
-        // KİMLİK DOĞRULAMA
+        // KİMLİK DOĞRULAMA (AUTH) İŞLEMLERİ
         function toggleAuthMode() {
             isLoginMode = !isLoginMode;
             document.getElementById('auth-title').innerText = isLoginMode ? "Giriş Yap 👋" : "Kayıt Ol 🚀";
@@ -145,7 +150,7 @@
         function authAction() {
             const u = document.getElementById('auth-user').value.trim();
             const p = document.getElementById('auth-pass').value.trim();
-            if(!u || !p) return alert("Boş bırakılamaz!");
+            if(!u || !p) return alert("Lütfen alanları doldurun!");
             socket.emit(isLoginMode ? 'login' : 'register', {username: u, password: p});
         }
 
@@ -165,20 +170,22 @@
             }
         });
 
-        // AYARLAR & PROFİL
+        // GELİŞMİŞ AYARLAR PANALİ VE PROFİL GÜNCELLEME
         function updateSidebarInfo() {
             document.getElementById('my-username').innerText = isim;
-            document.getElementById('my-bio').innerText = myBio || "Bio eklemediniz.";
+            document.getElementById('my-bio').innerText = myBio || "Sosyal medya biyografisi ekle.";
             
             const avatarEl = document.getElementById('my-avatar');
-            const postAvatarEl = document.getElementById('post-avatar');
+            const ph = document.getElementById('post-avatar-placeholder');
             
             if(myAvatarUrl) {
-                avatarEl.innerHTML = `<img src="${myAvatarUrl}" style="width:100%; height:100%; border-radius:50%; object-fit:cover;">`;
-                postAvatarEl.src = myAvatarUrl;
+                avatarEl.innerHTML = `<img src="${myAvatarUrl}" class="full-img">`;
+                ph.innerHTML = `<img src="${myAvatarUrl}" class="full-img">`;
             } else {
                 avatarEl.innerText = isim.charAt(0).toUpperCase();
-                avatarEl.style.background = isimdenRenkUret(isim);
+                avatarEl.style.background = renkUret(isim);
+                ph.innerText = "✍️";
+                ph.style.background = "transparent";
             }
         }
 
@@ -200,34 +207,36 @@
             myBio = data.bio;
             updateSidebarInfo();
             closeSettings();
-            alert("Profil güncellendi!");
         });
 
-        // BAŞKA KULLANICI PROFİLİ GÖRME
+        // SOSYAL PROFİL POPUP GÖRÜNTÜLEME
         function showProfile(username) {
             socket.emit('get_profile', username);
         }
         
         socket.on('show_user_profile', (row) => {
             document.getElementById('pop-username').innerText = row.username;
-            document.getElementById('pop-bio').innerText = row.bio || 'Henüz bir biyografi eklemedi.';
-            const img = document.getElementById('pop-avatar');
-            if(row.avatar_url) { img.src = row.avatar_url; img.style.display = 'block'; } 
-            else { img.style.display = 'none'; }
+            document.getElementById('pop-bio').innerText = row.bio || 'Henüz bir biyografi eklenmemiş.';
+            const box = document.getElementById('pop-avatar-box');
+            if(row.avatar_url) { 
+                box.innerHTML = `<img src="${row.avatar_url}" style="width:100%; height:100%; object-fit:cover; border-radius:50%;">`; 
+            } else { 
+                box.innerText = row.username.charAt(0).toUpperCase();
+                box.style.background = renkUret(row.username);
+            }
             document.getElementById('profile-popup').style.display = 'flex';
         });
 
-        // ODA VE LOBİ İŞLEMLERİ
+        // ODA VE LOBİ YÖNETİMİ
         function odayaKatil(odaAdi = null) {
             oda = odaAdi || document.getElementById('room-input').value.trim();
-            if(!oda) return alert('Oda adı girin!');
+            if(!oda) return alert('Lütfen geçerli bir oda adı yazın!');
             
             socket.emit('join_room', { room: oda });
             document.getElementById('room-title').innerText = `📌 ${oda}`;
             document.getElementById('dashboard-area').style.display = 'none';
             document.getElementById('chat-area').style.display = 'flex';
             document.getElementById('right-sidebar').style.display = 'block';
-            
             document.getElementById('nav-lobby').classList.remove('active');
         }
 
@@ -246,11 +255,11 @@
         socket.on('lobby_list', (rooms) => {
             const div = document.getElementById('active-rooms');
             if(rooms.length === 0) {
-                div.innerHTML = '<p style="opacity:0.6; font-size:13px;">Henüz aktif oda yok, ilk sen oluştur!</p>'; return;
+                div.innerHTML = '<p style="opacity:0.6; font-size:13px; padding:10px;">Henüz aktif oda bulunmuyor. İlk odayı yukarıdan sen oluştur!</p>'; return;
             }
             div.innerHTML = rooms.map(r => `
-                <div class="room-card" onclick="odayaKatil('${r.name}')">
-                    <div class="room-info"><b>📁 ${r.name}</b><span class="room-count">🟢 ${r.count} Kişi</span></div>
+                <div class="room-card glass-panel" onclick="odayaKatil('${r.name}')">
+                    <div class="room-info"><b>📁 ${r.name}</b><span class="room-count">🟢 ${r.count} Aktif</span></div>
                     <button class="join-btn">Katıl</button>
                 </div>
             `).join('');
@@ -261,24 +270,13 @@
             const usersDiv = document.getElementById('users-list');
             usersDiv.innerHTML = data.users.map(u => `
                 <div class="user-item" onclick="showProfile('${u}')">
-                    <div class="avatar-small" style="background:${isimdenRenkUret(u)}">${u.charAt(0).toUpperCase()}</div>
+                    <div class="avatar-small-chat" style="background:${renkUret(u)}">${u.charAt(0).toUpperCase()}</div>
                     <span>${u}</span>
                 </div>
             `).join('');
         });
 
-        // YARDIMCI FONKSİYONLAR
-        function isimdenRenkUret(str) {
-            let hash = 0; for (let i = 0; i < str.length; i++) { hash = str.charCodeAt(i) + ((hash << 5) - hash); }
-            const renkler = ['#e53935', '#1e88e5', '#43a047', '#8e24aa', '#d81b60', '#f4511e', '#00acc1', '#3949ab'];
-            return renkler[Math.abs(hash) % renkler.length];
-        }
-
-        function toggleTheme() { document.body.classList.toggle('dark-theme'); }
-        function toggleMute() { isMuted = !isMuted; document.getElementById('mute-btn').innerText = isMuted ? "🔇 Ses Kapalı" : "🔊 Ses Açık"; }
-        function emojiEkle(emoji) { const i = document.getElementById('msg'); i.value += emoji; i.focus(); }
-
-        // YANITLAMA & BEĞENME (YENİ)
+        // MESAJ YANITLAMA & BEĞENME AYARLARI
         function baslatReply(msgText, msgUser) {
             replyingTo = msgText;
             document.getElementById('reply-box').style.display = 'flex';
@@ -291,10 +289,22 @@
         }
 
         function likeMessage(msgId) { socket.emit('like_message', msgId); }
+        
         socket.on('message_liked', (data) => {
-            const likeSpan = document.getElementById(`like-count-${data.id}`);
-            if(likeSpan) likeSpan.innerText = data.likes;
+            const el = document.getElementById(`like-count-${data.id}`);
+            if(el) el.innerText = data.likes;
         });
+
+        // YARDIMCI GÖRSEL PARSERS
+        function renkUret(str) {
+            let hash = 0; for (let i = 0; i < str.length; i++) { hash = str.charCodeAt(i) + ((hash << 5) - hash); }
+            const renkler = ['#6a11cb', '#2575fc', '#e53935', '#43a047', '#8e24aa', '#f4511e', '#00acc1', '#ffb300'];
+            return renkler[Math.abs(hash) % renkler.length];
+        }
+
+        function toggleTheme() { document.body.classList.toggle('dark-theme'); }
+        function toggleMute() { isMuted = !isMuted; document.getElementById('mute-btn').innerText = isMuted ? "🔇 Sesler: Kapalı" : "🔊 Sesler: Açık"; }
+        function emojiEkle(emoji) { const i = document.getElementById('msg'); i.value += emoji; i.focus(); }
 
         function formatMessage(text) {
             const safeText = document.createElement('div'); safeText.innerText = text; let html = safeText.innerHTML;
@@ -319,24 +329,26 @@
         });
         document.getElementById('msg').addEventListener('keypress', (e) => { if(e.key === 'Enter') gonder(); });
 
-        // MESAJ YAZDIRMA EKRANI
+        // SOHBET DOM OLUŞTURMA SÜRECİ
         function mesajiEkranaYazdir(data) {
             const div = document.getElementById('messages');
             const msgDiv = document.createElement('div');
             msgDiv.classList.add('message-wrapper');
             msgDiv.id = `msg-${data.id}`;
             
-            const userColor = isimdenRenkUret(data.user);
+            const userColor = renkUret(data.user);
             const formattedMsg = formatMessage(data.message);
+            
             const avatarHtml = data.avatar_url 
-                ? `<img src="${data.avatar_url}" class="avatar" style="object-fit:cover;" onclick="showProfile('${data.user}')">` 
-                : `<div class="avatar" style="background:${userColor}; cursor:pointer;" onclick="showProfile('${data.user}')">${data.user.charAt(0).toUpperCase()}</div>`;
+                ? `<div class="avatar shadow-sm" onclick="showProfile('${data.user}')"><img src="${data.avatar_url}" class="full-img"></div>` 
+                : `<div class="avatar" style="background:${userColor};" onclick="showProfile('${data.user}')">${data.user.charAt(0).toUpperCase()}</div>`;
             
             const replyHtml = data.reply_to ? `<div class="reply-block">↪️ ${data.reply_to}</div>` : '';
+            
             const actionButtons = `
                 <div class="msg-actions">
-                    <span onclick="likeMessage(${data.id})" title="Beğen">❤️ <span id="like-count-${data.id}">${data.likes || 0}</span></span>
-                    <span onclick="baslatReply('${data.message.replace(/'/g, "\\'")}', '${data.user}')" title="Yanıtla">↩️</span>
+                    <span onclick="likeMessage(${data.id})" class="action-btn">❤️ <span id="like-count-${data.id}">${data.likes || 0}</span></span>
+                    <span onclick="baslatReply('${data.message.replace(/'/g, "\\'")}', '${data.user}')" class="action-btn">↩️</span>
                 </div>
             `;
 
@@ -344,7 +356,7 @@
                 msgDiv.innerHTML = `
                     <div class="message-content-wrapper my-wrapper">
                         ${actionButtons}
-                        <div class="message my-message">
+                        <div class="message my-message shadow-sm">
                             ${replyHtml}
                             <b>Sen</b>
                             <p>${formattedMsg}</p>
@@ -357,7 +369,7 @@
                 msgDiv.innerHTML = `
                     ${avatarHtml}
                     <div class="message-content-wrapper">
-                        <div class="message other-message">
+                        <div class="message other-message shadow-sm">
                             ${replyHtml}
                             <b style="color: ${userColor};">${data.user}</b>
                             <p>${formattedMsg}</p>
