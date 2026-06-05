@@ -19,35 +19,30 @@
     </div>
 
     <div class="app-layout" id="app-layout" style="display:none;">
-        
         <aside class="sidebar glass-panel">
             <div class="brand">🚀 SaaS Social</div>
-            
             <div class="user-info-card" onclick="openSettings()">
-                <div class="avatar" id="my-avatar">?</div>
-                <div class="info">
-                    <strong id="my-username">Yükleniyor...</strong>
-                    <span id="my-bio">Profili Düzenle</span>
+                <div class="avatar-container">
+                    <div class="avatar" id="my-avatar">?</div>
+                    <div class="online-dot"></div>
                 </div>
+                <div class="info"><strong id="my-username">Yükleniyor...</strong><span id="my-bio">Profili Düzenle</span></div>
             </div>
-            
             <nav class="menu">
                 <a href="#" onclick="lobiyeDon()" id="nav-lobby" class="active">🏠 Keşfet / Odalar</a>
-                <a href="#" onclick="openSettings()">⚙️ Gelişmiş Ayarlar</a>
-                <a href="#" onclick="cikisYap()" class="logout">🚪 Oturumu Kapat</a>
+                <a href="#" onclick="openSettings()">⚙️ Ayarlar (Yeni)</a>
+                <a href="#" onclick="cikisYap()" class="logout">🚪 Çıkış Yap</a>
             </nav>
         </aside>
 
-        <main class="main-content glass-panel">
+        <main class="main-content glass-panel" id="main-content-area">
             <div id="dashboard-area">
-                <div class="chat-header">
-                    <span>🔥 Trend Odaları Keşfet</span>
-                </div>
+                <div class="chat-header"><span>🔥 Trend Odaları Keşfet</span></div>
                 <div class="dashboard-content">
                     <div class="create-post-box glass-panel">
                         <div class="avatar-small" id="post-avatar-placeholder">✍️</div>
                         <div class="input-group-clean">
-                            <input type="text" id="room-input" placeholder="Yeni bir oda ismi yazın veya bulun..." autocomplete="off">
+                            <input type="text" id="room-input" placeholder="Oda ismi yazın veya bulun..." autocomplete="off">
                             <button onclick="odayaKatil()">Odaya Gir</button>
                         </div>
                     </div>
@@ -56,39 +51,42 @@
                 </div>
             </div>
 
-            <div id="chat-area" style="display:none; height:100%; flex-direction:column;">
+            <div id="chat-area" style="display:none; height:100%; flex-direction:column; position:relative;">
                 <div class="chat-header">
                     <div class="header-left">
-                        <button onclick="lobiyeDon()" class="back-btn">⬅ Odadan Çık</button>
+                        <button onclick="lobiyeDon()" class="back-btn">⬅ Çık</button>
                         <span id="room-title">Oda: -</span>
                     </div>
-                    <span id="online-count">🟢 0 Çevrimiçi</span>
+                    <div class="header-right" style="display:flex; gap:10px; align-items:center;">
+                        <input type="text" id="search-msg" class="search-input" placeholder="🔍 Mesajlarda ara..." onkeyup="mesajAra()">
+                        <button class="action-btn" onclick="odaPaylas()" title="Oda Adını Kopyala">🔗 Paylaş</button>
+                        <span id="online-count">🟢 0 Çevrimiçi</span>
+                    </div>
                 </div>
                 
-                <div id="messages"></div>
+                <div id="messages" onscroll="checkScroll()"></div>
+                <button id="scroll-bottom-btn" onclick="scrollToBottom()" style="display:none;">⬇️</button>
                 
                 <div id="reply-box" class="glass-panel" style="display:none;">
-                    <span>↩️ <strong id="reply-user"></strong> kullanıcısına yanıt veriliyor...</span>
-                    <button onclick="cancelReply()">✖ Cancel</button>
+                    <span>↩️ <strong id="reply-user"></strong> yanıtlanıyor...</span>
+                    <button onclick="cancelReply()">✖</button>
                 </div>
                 
                 <div id="typing-indicator"></div>
-                
                 <div class="emoji-bar">
                     <span onclick="emojiEkle('😀')">😀</span><span onclick="emojiEkle('😂')">😂</span>
                     <span onclick="emojiEkle('🔥')">🔥</span><span onclick="emojiEkle('❤️')">❤️</span>
-                    <span onclick="emojiEkle('👍')">👍</span><span onclick="emojiEkle('🚀')">🚀</span>
+                    <span onclick="emojiEkle('👍')">👍</span>
                 </div>
-                
                 <div class="input-group">
-                    <input type="text" id="msg" placeholder="Mesajınızı buraya yazın..." autocomplete="off">
+                    <input type="text" id="msg" placeholder="Mesaj yazın (*kalın*, _italik_, ~çizili~)..." autocomplete="off">
                     <button onclick="gonder()">Gönder</button>
                 </div>
             </div>
         </main>
 
         <aside class="right-sidebar glass-panel" id="right-sidebar" style="display:none;">
-            <h3>👥 Çevrimiçi Üyeler</h3>
+            <h3>👥 Odadakiler</h3>
             <div id="users-list" class="users-list"></div>
         </aside>
     </div>
@@ -99,17 +97,21 @@
             <h2>⚙️ Gelişmiş Ayarlar</h2>
             <div class="input-wrapper">
                 <label>Profil Fotoğrafı Linki (URL)</label>
-                <input type="text" id="set-avatar" placeholder="https://resimlinki.com/avatar.jpg">
+                <input type="text" id="set-avatar" placeholder="https://...">
             </div>
             <div class="input-wrapper">
                 <label>Hakkımda (Biyografi)</label>
                 <input type="text" id="set-bio" placeholder="Kendinizden bahsedin...">
             </div>
+            <div class="input-wrapper">
+                <label>Sohbet Duvar Kağıdı (URL) - YENİ</label>
+                <input type="text" id="set-bg" placeholder="Arka plan resim linki...">
+            </div>
             <div class="settings-toggles">
                 <button onclick="toggleTheme()" class="toggle-btn">🌙 Temayı Değiştir</button>
                 <button onclick="toggleMute()" id="mute-btn" class="toggle-btn">🔊 Sesler: Açık</button>
             </div>
-            <button onclick="saveSettings()" style="width:100%; margin-top:20px; border-radius: 12px;">Ayarları Güncelle</button>
+            <button onclick="saveSettings()" style="width:100%; margin-top:15px;">Kaydet</button>
         </div>
     </div>
 
@@ -118,29 +120,31 @@
             <span class="close" onclick="document.getElementById('profile-popup').style.display='none'">&times;</span>
             <div id="pop-avatar-box" class="profile-large-avatar"></div>
             <h2 id="pop-username">Kullanıcı Adı</h2>
-            <p id="pop-bio">Biyografi yükleniyor...</p>
+            <p id="pop-bio" style="font-style:italic;">Biyografi yükleniyor...</p>
+            <p id="pop-lastseen" style="font-size:11px; opacity:0.7; margin-top:10px;">👁 Son Görülme: -</p>
         </div>
     </div>
 
     <audio id="notification-sound" src="https://cdn.pixabay.com/download/audio/2021/08/04/audio_0625c1539c.mp3" preload="auto"></audio>
-
     <script src="/socket.io/socket.io.js"></script>
     <script>
         const socket = io();
-        let isim = "";
-        let oda = "";
-        let myAvatarUrl = "";
-        let myBio = "";
-        let typingTimeout;
-        let isMuted = false;
-        let isLoginMode = true;
-        let replyingTo = null;
+        let isim = "", oda = "", myAvatarUrl = "", myBio = "";
+        let typingTimeout; let isMuted = false; let isLoginMode = true; let replyingTo = null;
+        let lastMsgTime = 0; // Anti-Spam
+        let typingUsers = new Set(); // Çoklu Yazıyor
 
-        // KİMLİK DOĞRULAMA (AUTH) İŞLEMLERİ
+        // YENİ: Başlangıçta LocalStorage Yüklemeleri ve Bildirim İzni
+        window.onload = () => {
+            if(localStorage.getItem('theme') === 'dark') document.body.classList.add('dark-theme');
+            if(localStorage.getItem('mute') === 'true') toggleMute();
+            if(localStorage.getItem('chatBg')) document.getElementById('main-content-area').style.backgroundImage = `url(${localStorage.getItem('chatBg')})`;
+            if(Notification.permission !== "granted" && Notification.permission !== "denied") Notification.requestPermission();
+        };
+
         function toggleAuthMode() {
             isLoginMode = !isLoginMode;
             document.getElementById('auth-title').innerText = isLoginMode ? "Giriş Yap 👋" : "Kayıt Ol 🚀";
-            document.getElementById('auth-desc').innerText = isLoginMode ? "Sohbete katılmak için bilgilerinizi girin." : "Yeni bir hesap oluşturun.";
             document.getElementById('auth-btn').innerText = isLoginMode ? "Giriş Yap" : "Kayıt Ol";
             document.getElementById('auth-toggle-text').innerHTML = isLoginMode 
                 ? 'Hesabınız yok mu? <a href="#" onclick="toggleAuthMode()">Kayıt Olun</a>'
@@ -150,7 +154,7 @@
         function authAction() {
             const u = document.getElementById('auth-user').value.trim();
             const p = document.getElementById('auth-pass').value.trim();
-            if(!u || !p) return alert("Lütfen alanları doldurun!");
+            if(!u || !p) return alert("Alanları doldurun!");
             socket.emit(isLoginMode ? 'login' : 'register', {username: u, password: p});
         }
 
@@ -159,168 +163,160 @@
             if(res.isRegister) { alert(res.msg); toggleAuthMode(); } 
             else if(res.isLogin) {
                 isim = res.username;
-                myBio = res.bio;
-                myAvatarUrl = res.avatar_url;
-                
+                myBio = localStorage.getItem('myBio') || res.bio;
+                myAvatarUrl = localStorage.getItem('myAvatar') || res.avatar_url;
                 document.getElementById('auth-overlay').style.display = 'none';
                 document.getElementById('app-layout').style.display = 'flex';
-                
-                updateSidebarInfo();
-                socket.emit('get_lobbies');
+                updateSidebarInfo(); socket.emit('get_lobbies');
             }
         });
 
-        // GELİŞMİŞ AYARLAR PANALİ VE PROFİL GÜNCELLEME
         function updateSidebarInfo() {
             document.getElementById('my-username').innerText = isim;
             document.getElementById('my-bio').innerText = myBio || "Sosyal medya biyografisi ekle.";
-            
             const avatarEl = document.getElementById('my-avatar');
-            const ph = document.getElementById('post-avatar-placeholder');
-            
-            if(myAvatarUrl) {
-                avatarEl.innerHTML = `<img src="${myAvatarUrl}" class="full-img">`;
-                ph.innerHTML = `<img src="${myAvatarUrl}" class="full-img">`;
-            } else {
-                avatarEl.innerText = isim.charAt(0).toUpperCase();
-                avatarEl.style.background = renkUret(isim);
-                ph.innerText = "✍️";
-                ph.style.background = "transparent";
-            }
+            if(myAvatarUrl) avatarEl.innerHTML = `<img src="${myAvatarUrl}" class="full-img">`;
+            else { avatarEl.innerText = isim.charAt(0).toUpperCase(); avatarEl.style.background = renkUret(isim); }
         }
 
         function openSettings() {
             document.getElementById('settings-modal').style.display = 'flex';
             document.getElementById('set-avatar').value = myAvatarUrl || '';
             document.getElementById('set-bio').value = myBio || '';
+            document.getElementById('set-bg').value = localStorage.getItem('chatBg') || '';
         }
         function closeSettings() { document.getElementById('settings-modal').style.display = 'none'; }
         
         function saveSettings() {
             const a = document.getElementById('set-avatar').value.trim();
             const b = document.getElementById('set-bio').value.trim();
+            const bg = document.getElementById('set-bg').value.trim();
+            localStorage.setItem('myAvatar', a); localStorage.setItem('myBio', b); localStorage.setItem('chatBg', bg);
+            if(bg) document.getElementById('main-content-area').style.backgroundImage = `url(${bg})`;
+            else document.getElementById('main-content-area').style.backgroundImage = `none`;
             socket.emit('update_profile', { avatar_url: a, bio: b });
         }
 
         socket.on('profile_updated', (data) => {
-            myAvatarUrl = data.avatar_url;
-            myBio = data.bio;
-            updateSidebarInfo();
-            closeSettings();
+            myAvatarUrl = data.avatar_url; myBio = data.bio; updateSidebarInfo(); closeSettings();
         });
 
-        // SOSYAL PROFİL POPUP GÖRÜNTÜLEME
-        function showProfile(username) {
-            socket.emit('get_profile', username);
-        }
-        
+        function showProfile(username) { socket.emit('get_profile', username); }
         socket.on('show_user_profile', (row) => {
             document.getElementById('pop-username').innerText = row.username;
-            document.getElementById('pop-bio').innerText = row.bio || 'Henüz bir biyografi eklenmemiş.';
+            document.getElementById('pop-bio').innerText = row.bio || 'Biyografi yok.';
+            document.getElementById('pop-lastseen').innerText = `👁 Son Görülme: ${row.last_seen || 'Bilinmiyor'}`;
             const box = document.getElementById('pop-avatar-box');
-            if(row.avatar_url) { 
-                box.innerHTML = `<img src="${row.avatar_url}" style="width:100%; height:100%; object-fit:cover; border-radius:50%;">`; 
-            } else { 
-                box.innerText = row.username.charAt(0).toUpperCase();
-                box.style.background = renkUret(row.username);
-            }
+            if(row.avatar_url) box.innerHTML = `<img src="${row.avatar_url}" style="width:100%; height:100%; object-fit:cover; border-radius:50%;">`; 
+            else { box.innerHTML = ''; box.innerText = row.username.charAt(0).toUpperCase(); box.style.background = renkUret(row.username); }
             document.getElementById('profile-popup').style.display = 'flex';
         });
 
-        // ODA VE LOBİ YÖNETİMİ
         function odayaKatil(odaAdi = null) {
             oda = odaAdi || document.getElementById('room-input').value.trim();
-            if(!oda) return alert('Lütfen geçerli bir oda adı yazın!');
-            
+            if(!oda) return alert('Oda adı yazın!');
             socket.emit('join_room', { room: oda });
             document.getElementById('room-title').innerText = `📌 ${oda}`;
             document.getElementById('dashboard-area').style.display = 'none';
             document.getElementById('chat-area').style.display = 'flex';
             document.getElementById('right-sidebar').style.display = 'block';
             document.getElementById('nav-lobby').classList.remove('active');
+            scrollToBottom();
         }
 
         function lobiyeDon() {
-            socket.emit('leave_room');
-            document.getElementById('chat-area').style.display = 'none';
-            document.getElementById('right-sidebar').style.display = 'none';
-            document.getElementById('dashboard-area').style.display = 'block';
-            document.getElementById('messages').innerHTML = '';
-            document.getElementById('nav-lobby').classList.add('active');
-            socket.emit('get_lobbies');
+            socket.emit('leave_room'); document.getElementById('chat-area').style.display = 'none';
+            document.getElementById('right-sidebar').style.display = 'none'; document.getElementById('dashboard-area').style.display = 'block';
+            document.getElementById('messages').innerHTML = ''; document.getElementById('nav-lobby').classList.add('active'); socket.emit('get_lobbies');
         }
 
         function cikisYap() { location.reload(); }
-
         socket.on('lobby_list', (rooms) => {
             const div = document.getElementById('active-rooms');
-            if(rooms.length === 0) {
-                div.innerHTML = '<p style="opacity:0.6; font-size:13px; padding:10px;">Henüz aktif oda bulunmuyor. İlk odayı yukarıdan sen oluştur!</p>'; return;
-            }
+            if(rooms.length === 0) { div.innerHTML = '<p style="opacity:0.6; font-size:13px;">Aktif oda yok.</p>'; return; }
             div.innerHTML = rooms.map(r => `
                 <div class="room-card glass-panel" onclick="odayaKatil('${r.name}')">
                     <div class="room-info"><b>📁 ${r.name}</b><span class="room-count">🟢 ${r.count} Aktif</span></div>
                     <button class="join-btn">Katıl</button>
-                </div>
-            `).join('');
+                </div>`).join('');
         });
 
         socket.on('room_stats', (data) => {
             document.getElementById('online-count').innerText = `🟢 ${data.count} Çevrimiçi`;
-            const usersDiv = document.getElementById('users-list');
-            usersDiv.innerHTML = data.users.map(u => `
+            document.getElementById('users-list').innerHTML = data.users.map(u => `
                 <div class="user-item" onclick="showProfile('${u}')">
-                    <div class="avatar-small-chat" style="background:${renkUret(u)}">${u.charAt(0).toUpperCase()}</div>
+                    <div class="avatar-container"><div class="avatar-small-chat" style="background:${renkUret(u)}">${u.charAt(0).toUpperCase()}</div><div class="online-dot" style="width:8px;height:8px;"></div></div>
                     <span>${u}</span>
-                </div>
-            `).join('');
+                </div>`).join('');
         });
 
-        // MESAJ YANITLAMA & BEĞENME AYARLARI
+        // YENİ: Arama Özelliği
+        function mesajAra() {
+            const term = document.getElementById('search-msg').value.toLowerCase();
+            document.querySelectorAll('.message-wrapper').forEach(el => {
+                const text = el.querySelector('p').innerText.toLowerCase();
+                el.style.display = text.includes(term) ? 'flex' : 'none';
+            });
+        }
+
+        // YENİ: Oda Paylaş Butonu
+        function odaPaylas() {
+            navigator.clipboard.writeText(`Gel sohbet edelim! Oda Adı: ${oda}`);
+            alert("Oda adı ve davet kopyalandı!");
+        }
+
+        // YENİ: Mesaj Kopyalama
+        function kopyala(metin) { navigator.clipboard.writeText(metin); }
+
         function baslatReply(msgText, msgUser) {
-            replyingTo = msgText;
-            document.getElementById('reply-box').style.display = 'flex';
-            document.getElementById('reply-user').innerText = msgUser;
-            document.getElementById('msg').focus();
+            replyingTo = msgText; document.getElementById('reply-box').style.display = 'flex';
+            document.getElementById('reply-user').innerText = msgUser; document.getElementById('msg').focus();
         }
-        function cancelReply() {
-            replyingTo = null;
-            document.getElementById('reply-box').style.display = 'none';
-        }
-
+        function cancelReply() { replyingTo = null; document.getElementById('reply-box').style.display = 'none'; }
         function likeMessage(msgId) { socket.emit('like_message', msgId); }
-        
-        socket.on('message_liked', (data) => {
-            const el = document.getElementById(`like-count-${data.id}`);
-            if(el) el.innerText = data.likes;
-        });
+        socket.on('message_liked', (data) => { const el = document.getElementById(`like-count-${data.id}`); if(el) el.innerText = data.likes; });
 
-        // YARDIMCI GÖRSEL PARSERS
         function renkUret(str) {
-            let hash = 0; for (let i = 0; i < str.length; i++) { hash = str.charCodeAt(i) + ((hash << 5) - hash); }
-            const renkler = ['#6a11cb', '#2575fc', '#e53935', '#43a047', '#8e24aa', '#f4511e', '#00acc1', '#ffb300'];
-            return renkler[Math.abs(hash) % renkler.length];
+            let hash = 0; for (let i = 0; i < str.length; i++) hash = str.charCodeAt(i) + ((hash << 5) - hash);
+            const r = ['#6a11cb', '#2575fc', '#e53935', '#43a047', '#8e24aa', '#f4511e', '#00acc1', '#ffb300'];
+            return r[Math.abs(hash) % r.length];
         }
 
-        function toggleTheme() { document.body.classList.toggle('dark-theme'); }
-        function toggleMute() { isMuted = !isMuted; document.getElementById('mute-btn').innerText = isMuted ? "🔇 Sesler: Kapalı" : "🔊 Sesler: Açık"; }
+        function toggleTheme() { 
+            document.body.classList.toggle('dark-theme'); 
+            localStorage.setItem('theme', document.body.classList.contains('dark-theme') ? 'dark' : 'light');
+        }
+        function toggleMute() { 
+            isMuted = !isMuted; 
+            localStorage.setItem('mute', isMuted);
+            document.getElementById('mute-btn').innerText = isMuted ? "🔇 Sesler: Kapalı" : "🔊 Sesler: Açık"; 
+        }
         function emojiEkle(emoji) { const i = document.getElementById('msg'); i.value += emoji; i.focus(); }
 
+        // YENİ: Markdown, Mention ve Link Kartları
         function formatMessage(text) {
-            const safeText = document.createElement('div'); safeText.innerText = text; let html = safeText.innerHTML;
+            let safe = document.createElement('div'); safe.innerText = text; let html = safe.innerHTML;
+            // Markdown
+            html = html.replace(/\*(.*?)\*/g, '<b>$1</b>').replace(/_(.*?)_/g, '<i>$1</i>').replace(/~(.*?)~/g, '<del>$1</del>');
+            // Mention
+            const mentionRegex = new RegExp(`@${isim}\\b`, 'g');
+            html = html.replace(mentionRegex, `<span class="mention-highlight">@${isim}</span>`);
+            // Linkler ve Resimler
             return html.replace(/(https?:\/\/[^\s]+)/g, (url) => {
                 if (url.match(/\.(jpeg|jpg|gif|png|webp)$/i) != null) return `<br><img src="${url}" class="chat-img" onclick="window.open('${url}', '_blank')"><br>`;
-                return `<a href="${url}" target="_blank" class="chat-link">${url}</a>`;
+                return `<a href="${url}" target="_blank" class="chat-link-card">🔗 Bağlantıya Git</a>`;
             });
         }
 
         function gonder() {
             const txt = document.getElementById('msg');
             if(!txt.value.trim()) return;
+            // YENİ: Spam Koruması
+            if(Date.now() - lastMsgTime < 1000) return alert("Çok hızlı yazıyorsunuz, lütfen 1 saniye bekleyin!");
+            lastMsgTime = Date.now();
+
             socket.emit('send_message', { message: txt.value, reply_to: replyingTo });
-            txt.value = '';
-            cancelReply();
-            socket.emit('typing', { isTyping: false });
+            txt.value = ''; cancelReply(); socket.emit('typing', { isTyping: false });
         }
 
         document.getElementById('msg').addEventListener('input', () => {
@@ -329,80 +325,89 @@
         });
         document.getElementById('msg').addEventListener('keypress', (e) => { if(e.key === 'Enter') gonder(); });
 
-        // SOHBET DOM OLUŞTURMA SÜRECİ
         function mesajiEkranaYazdir(data) {
             const div = document.getElementById('messages');
-            const msgDiv = document.createElement('div');
-            msgDiv.classList.add('message-wrapper');
-            msgDiv.id = `msg-${data.id}`;
-            
+            const msgDiv = document.createElement('div'); msgDiv.classList.add('message-wrapper'); msgDiv.id = `msg-${data.id}`;
             const userColor = renkUret(data.user);
             const formattedMsg = formatMessage(data.message);
             
-            const avatarHtml = data.avatar_url 
-                ? `<div class="avatar shadow-sm" onclick="showProfile('${data.user}')"><img src="${data.avatar_url}" class="full-img"></div>` 
-                : `<div class="avatar" style="background:${userColor};" onclick="showProfile('${data.user}')">${data.user.charAt(0).toUpperCase()}</div>`;
-            
+            // YENİ: Jumbo Emoji Kontrolü
+            const isJumbo = /^[\p{Emoji}\s]+$/u.test(data.message.trim());
+            const pClass = isJumbo ? 'class="jumbo-emoji"' : '';
+
+            // YENİ: Mention Vurgusu Arka Planı
+            const isMentioned = data.message.includes(`@${isim}`);
+            const mentionStyle = isMentioned ? `border: 2px solid #ffb300; background: rgba(255, 179, 0, 0.2);` : ``;
+
+            const avatarHtml = data.avatar_url ? `<div class="avatar shadow-sm" onclick="showProfile('${data.user}')"><img src="${data.avatar_url}" class="full-img"></div>` : `<div class="avatar" style="background:${userColor};" onclick="showProfile('${data.user}')">${data.user.charAt(0).toUpperCase()}</div>`;
             const replyHtml = data.reply_to ? `<div class="reply-block">↪️ ${data.reply_to}</div>` : '';
             
+            // YENİ: Kopyala Butonu Eklendi
             const actionButtons = `
                 <div class="msg-actions">
                     <span onclick="likeMessage(${data.id})" class="action-btn">❤️ <span id="like-count-${data.id}">${data.likes || 0}</span></span>
                     <span onclick="baslatReply('${data.message.replace(/'/g, "\\'")}', '${data.user}')" class="action-btn">↩️</span>
-                </div>
-            `;
+                    <span onclick="kopyala('${data.message.replace(/'/g, "\\'")}')" class="action-btn" title="Kopyala">📋</span>
+                </div>`;
 
             if(data.user === isim) {
                 msgDiv.innerHTML = `
                     <div class="message-content-wrapper my-wrapper">
                         ${actionButtons}
                         <div class="message my-message shadow-sm">
-                            ${replyHtml}
-                            <b>Sen</b>
-                            <p>${formattedMsg}</p>
+                            ${replyHtml} <b>Sen</b> <p ${pClass}>${formattedMsg}</p>
                             <span class="time-stamp">${data.time}</span>
                             <span class="delete-icon" onclick="socket.emit('delete_message', ${data.id})">🗑️</span>
                         </div>
-                    </div>
-                    ${avatarHtml}`;
+                    </div> ${avatarHtml}`;
             } else {
                 msgDiv.innerHTML = `
                     ${avatarHtml}
                     <div class="message-content-wrapper">
-                        <div class="message other-message shadow-sm">
-                            ${replyHtml}
-                            <b style="color: ${userColor};">${data.user}</b>
-                            <p>${formattedMsg}</p>
+                        <div class="message other-message shadow-sm" style="${mentionStyle}">
+                            ${replyHtml} <b style="color: ${userColor};">${data.user}</b> <p ${pClass}>${formattedMsg}</p>
                             <span class="time-stamp">${data.time}</span>
-                        </div>
-                        ${actionButtons}
+                        </div> ${actionButtons}
                     </div>`;
             }
-            div.appendChild(msgDiv); div.scrollTop = div.scrollHeight;
+            div.appendChild(msgDiv); 
+            if(data.user === isim) scrollToBottom();
         }
 
         socket.on('message_history', (rows) => {
-            document.getElementById('messages').innerHTML = ''; rows.forEach(r => mesajiEkranaYazdir(r));
+            document.getElementById('messages').innerHTML = ''; rows.forEach(r => mesajiEkranaYazdir(r)); setTimeout(scrollToBottom, 200);
         });
 
         socket.on('receive_message', (data) => {
             mesajiEkranaYazdir(data);
-            if(data.user !== isim && !isMuted) document.getElementById('notification-sound').play().catch(()=>{});
+            if(data.user !== isim && !isMuted) {
+                document.getElementById('notification-sound').play().catch(()=>{});
+                // YENİ: Tarayıcı Bildirimi
+                if (Notification.permission === "granted" && document.hidden) {
+                    new Notification(`Yeni Mesaj - ${data.user}`, { body: data.message, icon: data.avatar_url || 'https://cdn-icons-png.flaticon.com/512/149/149071.png' });
+                }
+            }
         });
 
-        socket.on('message_deleted', (msgId) => {
-            const el = document.getElementById(`msg-${msgId}`);
-            if(el) { el.style.opacity = '0'; setTimeout(() => el.remove(), 300); }
-        });
+        socket.on('message_deleted', (msgId) => { const el = document.getElementById(`msg-${msgId}`); if(el) { el.style.opacity = '0'; setTimeout(() => el.remove(), 300); } });
+        socket.on('system_message', (msg) => { const div = document.getElementById('messages'); div.innerHTML += `<div class="system-message">${msg}</div>`; scrollToBottom(); });
 
-        socket.on('system_message', (msg) => {
-            const div = document.getElementById('messages');
-            div.innerHTML += `<div class="system-message">${msg}</div>`; div.scrollTop = div.scrollHeight;
-        });
-
+        // YENİ: Çoklu Yazıyor Simülasyonu
         socket.on('user_typing', (data) => {
-            document.getElementById('typing-indicator').innerText = data.isTyping ? `✍️ ${data.user} yazıyor...` : '';
+            if(data.isTyping) typingUsers.add(data.user); else typingUsers.delete(data.user);
+            const ind = document.getElementById('typing-indicator');
+            if(typingUsers.size === 0) ind.innerText = '';
+            else if(typingUsers.size === 1) ind.innerText = `✍️ ${[...typingUsers][0]} yazıyor...`;
+            else ind.innerText = `✍️ ${[...typingUsers].join(', ')} yazıyor...`;
         });
+
+        // YENİ: Scroll To Bottom Mantığı
+        function checkScroll() {
+            const div = document.getElementById('messages');
+            const btn = document.getElementById('scroll-bottom-btn');
+            if(div.scrollTop < div.scrollHeight - div.clientHeight - 100) btn.style.display = 'block'; else btn.style.display = 'none';
+        }
+        function scrollToBottom() { const div = document.getElementById('messages'); div.scrollTop = div.scrollHeight; }
     </script>
 </body>
 </html>
