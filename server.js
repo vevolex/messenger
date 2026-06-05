@@ -14,21 +14,29 @@ const db = new sqlite3.Database('./chat.db', (err) => {
     console.log('📦 SQLite veritabanı aktif.');
 });
 
-// Mesajlar Tablosu
-db.run(`CREATE TABLE IF NOT EXISTS messages (
-    id INTEGER PRIMARY KEY AUTOINCREMENT,
-    room TEXT,
-    user TEXT,
-    message TEXT,
-    time TEXT
-)`);
+db.serialize(() => {
+    // Mesajlar Tablosu
+    db.run(`CREATE TABLE IF NOT EXISTS messages (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        room TEXT,
+        user TEXT,
+        message TEXT,
+        time TEXT
+    )`);
 
-// Kullanıcılar Tablosu (YENİ)
-db.run(`CREATE TABLE IF NOT EXISTS users (
-    id INTEGER PRIMARY KEY AUTOINCREMENT,
-    username TEXT UNIQUE,
-    password TEXT
-)`);
+    // Kullanıcılar Tablosu
+    db.run(`CREATE TABLE IF NOT EXISTS users (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        username TEXT UNIQUE,
+        password TEXT
+    )`);
+
+    // YENİ ÖZELLİKLER İÇİN TABLO GÜNCELLEMELERİ (Kodu bozmadan güvenli ekleme)
+    db.run(`ALTER TABLE users ADD COLUMN bio TEXT`, (err) => {});
+    db.run(`ALTER TABLE users ADD COLUMN avatar_url TEXT`, (err) => {});
+    db.run(`ALTER TABLE messages ADD COLUMN likes INTEGER DEFAULT 0`, (err) => {});
+    db.run(`ALTER TABLE messages ADD COLUMN reply_to TEXT`, (err) => {});
+});
 
 app.use(express.static(path.join(__dirname, 'public')));
 
@@ -50,7 +58,6 @@ function getRoomUsers(roomName) {
     return [...new Set(users)];
 }
 
-// Aktif odaları bulma (YENİ)
 function getActiveRooms() {
     const rooms = [];
     for (let [id, sockets] of io.sockets.adapter.rooms) {
@@ -63,9 +70,10 @@ function getActiveRooms() {
 
 io.on('connection', (socket) => {
     
-    // --- ÜYELİK SİSTEMİ (YENİ) ---
+    // --- ÜYELİK SİSTEMİ ---
     socket.on('register', (data) => {
-        db.run(`INSERT INTO users (username, password) VALUES (?, ?)`, [data.username, data.password], function(err) {
+        db.run(`INSERT INTO users (username, password, bio, avatar_url) VALUES (?, ?, ?, ?)`, 
+        [data.username, data.password, 'Merhaba, ben yeni katıldım!', ''], function(err) {
             if (err) {
                 socket.emit('auth_result', { success: false, msg: 'Bu kullanıcı adı zaten alınmış!' });
             } else {
@@ -78,14 +86,32 @@ io.on('connection', (socket) => {
         db.get(`SELECT * FROM users WHERE username = ? AND password = ?`, [data.username, data.password], (err, row) => {
             if (row) {
                 socket.username = row.username;
-                socket.emit('auth_result', { success: true, isLogin: true, username: row.username });
+                socket.emit('auth_result', { 
+                    success: true, 
+                    isLogin: true, 
+                    username: row.username,
+                    bio: row.bio,
+                    avatar_url: row.avatar_url
+                });
             } else {
                 socket.emit('auth_result', { success: false, msg: 'Kullanıcı adı veya şifre hatalı!' });
             }
         });
     });
 
-    // Lobi için aktif odaları gönder (YENİ)
+    // --- PROFİL VE AYARLAR (YENİ) ---
+    socket.on('update_profile', (data) => {
+        db.run(`UPDATE users SET bio = ?, avatar_url = ? WHERE username = ?`, [data.bio, data.avatar_url, socket.username], (err) => {
+            if(!err) socket.emit('profile_updated', data);
+        });
+    });
+
+    socket.on('get_profile', (username) => {
+        db.get(`SELECT username, bio, avatar_url FROM users WHERE username = ?`, [username], (err, row) => {
+            if(row) socket.emit('show_user_profile', row);
+        });
+    });
+
     socket.on('get_lobbies', () => {
         socket.emit('lobby_list', getActiveRooms());
     });
@@ -97,9 +123,16 @@ io.on('connection', (socket) => {
         
         io.to(data.room).emit('system_message', `${socket.username} sohbete katıldı.`);
         io.to(data.room).emit('room_stats', { count: getRoomCount(data.room), users: getRoomUsers(data.room) });
-        io.emit('lobby_list', getActiveRooms()); // Tüm lobilere aktif oda güncellemesi yap
+        io.emit('lobby_list', getActiveRooms()); 
         
-        db.all(`SELECT id, user, message, time FROM messages WHERE room = ? ORDER BY id ASC`, [data.room], (err, rows) => {
+        // Mesajları çekerken kullanıcıların avatarlarını da birleştiriyoruz (JOIN)
+        const query = `
+            SELECT m.id, m.user, m.message, m.time, m.likes, m.reply_to, u.avatar_url 
+            FROM messages m 
+            LEFT JOIN users u ON m.user = u.username
+            WHERE m.room = ? ORDER BY m.id ASC`;
+            
+        db.all(query, [data.room], (err, rows) => {
             if (err) return console.log(err.message);
             socket.emit('message_history', rows);
         });
@@ -118,21 +151,40 @@ io.on('connection', (socket) => {
 
     socket.on('send_message', (data) => {
         const simdi = new Date();
-        const saat = String(simdi.getHours()).padStart(2, '0');
-        const dakika = String(simdi.getMinutes()).padStart(2, '0');
-        const timeStr = `${saat}:${dakika}`;
+        const timeStr = String(simdi.getHours()).padStart(2, '0') + ':' + String(simdi.getMinutes()).padStart(2, '0');
 
-        db.run(`INSERT INTO messages (room, user, message, time) VALUES (?, ?, ?, ?)`, 
-            [socket.room, socket.username, data.message, timeStr], 
+        db.run(`INSERT INTO messages (room, user, message, time, likes, reply_to) VALUES (?, ?, ?, ?, 0, ?)`, 
+            [socket.room, socket.username, data.message, timeStr, data.reply_to], 
             function(err) {
                 if (err) return console.log(err.message);
-                const msgData = { id: this.lastID, user: socket.username, message: data.message, time: timeStr };
-                io.to(socket.room).emit('receive_message', msgData);
+                
+                db.get(`SELECT avatar_url FROM users WHERE username = ?`, [socket.username], (err, row) => {
+                    const msgData = { 
+                        id: this.lastID, 
+                        user: socket.username, 
+                        message: data.message, 
+                        time: timeStr,
+                        likes: 0,
+                        reply_to: data.reply_to,
+                        avatar_url: row ? row.avatar_url : ''
+                    };
+                    io.to(socket.room).emit('receive_message', msgData);
+                });
             }
         );
     });
 
-    // Mesaj Silme İşlemi (YENİ)
+    // --- BEĞENİ SİSTEMİ (YENİ) ---
+    socket.on('like_message', (msgId) => {
+        db.run(`UPDATE messages SET likes = likes + 1 WHERE id = ?`, [msgId], function(err) {
+            if (!err) {
+                db.get(`SELECT likes FROM messages WHERE id = ?`, [msgId], (err, row) => {
+                    if(row) io.to(socket.room).emit('message_liked', { id: msgId, likes: row.likes });
+                });
+            }
+        });
+    });
+
     socket.on('delete_message', (msgId) => {
         db.run(`DELETE FROM messages WHERE id = ? AND user = ? AND room = ?`, [msgId, socket.username, socket.room], function(err) {
             if (!err && this.changes > 0) {
