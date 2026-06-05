@@ -31,7 +31,7 @@ db.serialize(() => {
         password TEXT
     )`);
 
-    // YENİ ÖZELLİKLER İÇİN TABLO GÜNCELLEMELERİ (Kodu bozmadan güvenli ekleme)
+    // KODU BOZMADAN GÜVENLİ SÜTUN EKLEMELERİ (Eğer yoksa eklenir)
     db.run(`ALTER TABLE users ADD COLUMN bio TEXT`, (err) => {});
     db.run(`ALTER TABLE users ADD COLUMN avatar_url TEXT`, (err) => {});
     db.run(`ALTER TABLE messages ADD COLUMN likes INTEGER DEFAULT 0`, (err) => {});
@@ -73,7 +73,7 @@ io.on('connection', (socket) => {
     // --- ÜYELİK SİSTEMİ ---
     socket.on('register', (data) => {
         db.run(`INSERT INTO users (username, password, bio, avatar_url) VALUES (?, ?, ?, ?)`, 
-        [data.username, data.password, 'Merhaba, ben yeni katıldım!', ''], function(err) {
+        [data.username, data.password, 'Merhaba! Ben de buradayım.', ''], function(err) {
             if (err) {
                 socket.emit('auth_result', { success: false, msg: 'Bu kullanıcı adı zaten alınmış!' });
             } else {
@@ -99,7 +99,7 @@ io.on('connection', (socket) => {
         });
     });
 
-    // --- PROFİL VE AYARLAR (YENİ) ---
+    // --- PROFİL VE AYARLAR (YENİ ÖZELLİK) ---
     socket.on('update_profile', (data) => {
         db.run(`UPDATE users SET bio = ?, avatar_url = ? WHERE username = ?`, [data.bio, data.avatar_url, socket.username], (err) => {
             if(!err) socket.emit('profile_updated', data);
@@ -125,7 +125,7 @@ io.on('connection', (socket) => {
         io.to(data.room).emit('room_stats', { count: getRoomCount(data.room), users: getRoomUsers(data.room) });
         io.emit('lobby_list', getActiveRooms()); 
         
-        // Mesajları çekerken kullanıcıların avatarlarını da birleştiriyoruz (JOIN)
+        // Kullanıcı avatarlarıyla birlikte mesaj geçmişini getir
         const query = `
             SELECT m.id, m.user, m.message, m.time, m.likes, m.reply_to, u.avatar_url 
             FROM messages m 
@@ -174,7 +174,7 @@ io.on('connection', (socket) => {
         );
     });
 
-    // --- BEĞENİ SİSTEMİ (YENİ) ---
+    // --- BEĞENİ SİSTEMİ (YENİ ÖZELLİK) ---
     socket.on('like_message', (msgId) => {
         db.run(`UPDATE messages SET likes = likes + 1 WHERE id = ?`, [msgId], function(err) {
             if (!err) {
@@ -209,5 +209,5 @@ io.on('connection', (socket) => {
 
 const PORT = process.env.PORT || 3000;
 server.listen(PORT, () => {
-    console.log(`🚀 Sunucu http://localhost:${PORT} adresinde çalışıyor`);
+    console.log(`🚀 Sunucu http://localhost:${PORT} adresinde aktif.`);
 });
