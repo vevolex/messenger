@@ -3,96 +3,169 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Premium Messenger</title>
+    <title>SaaS Messenger Premium</title>
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
+    <div id="toast-container"></div>
+
     <div id="auth-overlay">
-        <div class="modern-messenger-auth glass-panel">
-            <div class="logo-circle"><span style="font-size: 36px;">💬</span></div>
-            <h1 id="auth-title">Messenger'a Giriş</h1>
-            <p id="auth-desc" class="auth-subtitle">Arkadaşlarınla anında bağlantı kur.</p>
-            <div class="modern-input-group">
-                <span>👤</span><input type="text" id="auth-user" placeholder="Kullanıcı Adı" autocomplete="off">
+        <div class="auth-box glass-panel">
+            <div class="auth-left">
+                <div class="auth-brand">🚀 SaaS Social</div>
+                <h1 class="auth-heading">İletişimin Yeni<br>Boyutunu Keşfedin.</h1>
+                <p class="auth-desc-text">Takımınızla, topluluğunuzla veya arkadaşlarınızla modern, güvenli ve kesintisiz iletişim kurun.</p>
+                <div class="feature-bullets">
+                    <span>✨ Akıllı Mesajlaşma & Sesli İletişim</span>
+                    <span>🎨 Tamamen Kişiselleştirilebilir Profil</span>
+                    <span>🔒 Uçtan Uca Hızlı Soket Mimarisi</span>
+                </div>
             </div>
-            <div class="modern-input-group">
-                <span>🔒</span><input type="password" id="auth-pass" placeholder="Şifre" autocomplete="off">
+            <div class="auth-right">
+                <h2 id="auth-title">Hoş Geldiniz 👋</h2>
+                <p class="auth-subtitle" id="auth-desc">Devam etmek için giriş yapın.</p>
+                <div class="input-wrapper">
+                    <label>Kullanıcı Adı</label>
+                    <input type="text" id="auth-user" placeholder="Kullanıcı adınızı girin" autocomplete="off">
+                </div>
+                <div class="input-wrapper">
+                    <label>Şifre</label>
+                    <input type="password" id="auth-pass" placeholder="••••••••" autocomplete="off">
+                </div>
+                <button onclick="authAction()" class="auth-btn" id="auth-btn">Giriş Yap</button>
+                <div class="auth-footer"><p id="auth-toggle-text">Hesabınız yok mu? <a href="#" onclick="toggleAuthMode()">Hesap Oluşturun</a></p></div>
             </div>
-            <button onclick="authAction()" class="modern-auth-btn" id="auth-btn">Devam Et</button>
-            <p style="margin-top:20px; font-size:14px; opacity:0.8" id="auth-toggle-text">
-                Hesabın yok mu? <a href="#" onclick="toggleAuthMode()" style="color:#0072ff; font-weight:bold;">Kaydol</a>
-            </p>
         </div>
     </div>
 
     <div class="app-layout" id="app-layout" style="display:none;">
         <aside class="sidebar glass-panel">
-            <h2 style="text-align:center;">🚀 Sohbet</h2>
-            <div style="margin-top:20px;">
-                <input type="text" id="room-input" placeholder="Oda Adı Yaz..." style="width:90%; padding:10px; border-radius:10px; border:none; outline:none; margin-bottom:10px;">
-                <button onclick="odayaKatil()" class="modern-auth-btn" style="padding:10px; margin:0;">Odaya Gir / Oluştur</button>
+            <div class="brand">🚀 SaaS Social</div>
+            <div class="user-info-card" onclick="openSettings()">
+                <div class="avatar-container">
+                    <div class="avatar" id="my-avatar">?</div>
+                    <div class="online-dot"></div>
+                </div>
+                <div class="info"><strong id="my-username">Yükleniyor...</strong><span id="my-bio">Profili Düzenle</span></div>
             </div>
-            <h3 style="margin-top:20px;">🔥 Trend Odalar</h3>
-            <div id="active-rooms" style="display:flex; flex-direction:column; gap:10px; margin-top:10px;"></div>
-            <button onclick="location.reload()" style="margin-top:auto; background:none; border:none; color:#ff4757; cursor:pointer; font-weight:bold; font-size:16px;">🚪 Çıkış Yap</button>
+            <div style="padding: 10px 15px;">
+                <label style="font-size:11px; opacity:0.7;">Yazı Boyutu:</label>
+                <input type="range" min="12" max="20" value="14.5" oninput="document.documentElement.style.setProperty('--msg-font-size', this.value + 'px')" style="width:100%;">
+            </div>
+            <nav class="menu">
+                <a href="#" onclick="lobiyeDon()" id="nav-lobby" class="active">🏠 Keşfet / Odalar</a>
+                <a href="#" onclick="openSettings()">⚙️ Gelişmiş Ayarlar</a>
+                <a href="#" onclick="document.body.classList.toggle('neon-theme')">🎆 Neon Siberpunk Modu</a>
+                <a href="#" onclick="cikisYap()" class="logout">🚪 Oturumu Kapat</a>
+            </nav>
         </aside>
 
-        <main class="main-content glass-panel" id="chat-area" style="display:none;">
-            <div class="chat-header">
-                <div>
-                    <strong id="room-title" style="font-size:18px;">Oda Seçilmedi</strong>
-                    <button onclick="odaIndir()" style="background:none; border:none; cursor:pointer;" title="Sohbeti Dışa Aktar">📥 İndir</button>
-                </div>
-                <div>
-                    <input type="text" id="search-msg" placeholder="🔍 Mesaj Ara..." onkeyup="mesajAra()" style="padding:8px 15px; border-radius:15px; border:1px solid rgba(255,255,255,0.5); background:rgba(0,0,0,0.1); color:inherit; outline:none;">
+        <main class="main-content glass-panel" id="main-content-area">
+            <div id="dashboard-area">
+                <div class="chat-header"><span>🔥 Trend Odaları Keşfet</span></div>
+                <div class="dashboard-content">
+                    <div class="create-post-box glass-panel">
+                        <div class="avatar-small" id="post-avatar-placeholder">✍️</div>
+                        <div class="input-group-clean">
+                            <input type="text" id="room-input" placeholder="Oda ismi yazın..." autocomplete="off">
+                            <input type="password" id="room-pass" placeholder="Şifre (Opsiyonel)" autocomplete="off" style="margin-left: 5px; flex:0.5;">
+                            <button onclick="odayaKatil()">Odaya Gir 🔒</button>
+                        </div>
+                    </div>
+                    <h3>Aktif Topluluklar</h3>
+                    <div id="active-rooms" class="room-list"></div>
                 </div>
             </div>
-            
-            <div id="messages"></div>
-            
-            <div id="typing-indicator" style="font-size:12px; margin-left:25px; font-style:italic; height:15px;"></div>
-            
-            <div class="input-group">
-                <input type="file" id="image-upload" accept="image/*" style="display:none">
-                <button class="media-btn" onclick="document.getElementById('image-upload').click()" title="Fotoğraf Gönder">🖼️</button>
-                <button class="media-btn" id="mic-btn" onclick="toggleAudioRecord()" title="Sesli Mesaj Gönder">🎤</button>
-                <input type="text" id="msg" placeholder="Bir mesaj yazın..." autocomplete="off" oninput="yaziyor()" onkeypress="if(event.key==='Enter') gonder()">
-                <button class="send-btn" onclick="gonder()">Gönder 🚀</button>
+
+            <div id="chat-area" style="display:none; height:100%; flex-direction:column; position:relative;">
+                <div class="chat-header">
+                    <div class="header-left">
+                        <button onclick="lobiyeDon()" class="back-btn">⬅ Çık</button>
+                        <span id="room-title">Oda: -</span>
+                    </div>
+                    <div class="header-right" style="display:flex; gap:10px; align-items:center;">
+                        <input type="text" id="search-msg" class="search-input" placeholder="🔍 Ara..." onkeyup="mesajAra()">
+                        <button class="action-btn" onclick="odaIndir()" title="Sohbeti İndir">📥</button>
+                        <button class="action-btn" onclick="document.getElementById('messages').innerHTML=''" title="Ekranı Temizle">🧹</button>
+                    </div>
+                </div>
+                
+                <div id="pinned-msg-container">
+                    📌 <strong>Sabitlenen:</strong> <span id="pinned-text">-</span>
+                </div>
+
+                <div id="messages" onscroll="checkScroll()"></div>
+                <button id="scroll-bottom-btn" onclick="scrollToBottom()" style="display:none;">⬇️</button>
+                
+                <div id="typing-indicator"></div>
+
+                <div class="quick-replies">
+                    <button onclick="hizliYanit('Selam 👋')">Selam 👋</button>
+                    <button onclick="hizliYanit('Teşekkürler 🙏')">Teşekkürler 🙏</button>
+                    <button onclick="hizliYanit('Tamamdır 👍')">Tamamdır 👍</button>
+                    <button onclick="hizliYanit('Şu an meşgulüm.')">Meşgulüm ⏳</button>
+                </div>
+                
+                <div class="input-group">
+                    <input type="file" id="file-upload" accept="image/*, audio/*, video/*" style="display:none;" onchange="dosyaSecildi(event)">
+                    <button class="media-btn" onclick="document.getElementById('file-upload').click()" title="Dosya Gönder">📎</button>
+                    <button class="media-btn" id="mic-btn" onclick="toggleAudioRecord()" title="Sesli Mesaj">🎤</button>
+                    
+                    <label style="display:flex; align-items:center; gap:5px; font-size:11px; font-weight:bold; color:#ff4757; cursor:pointer;" title="10 Saniye Sonra Silinir">
+                        <input type="checkbox" id="flash-check"> 🧨
+                    </label>
+
+                    <input type="text" id="msg" placeholder="Mesaj yazın... (*kalın*, _italik_, ```kod```)" autocomplete="off" oninput="yaziyor()" onkeypress="if(event.key==='Enter') gonder()">
+                    <button onclick="gonder()" class="send-btn">Gönder 🚀</button>
+                </div>
             </div>
         </main>
 
         <aside class="right-sidebar glass-panel" id="right-sidebar" style="display:none;">
             <h3>👥 Odadakiler</h3>
-            <p style="font-size:12px; color:gray;">Gizli DM (Özel Mesaj) başlatmak için kişiye tıklayın.</p>
             <div id="users-list" class="users-list"></div>
         </aside>
     </div>
 
-    <div id="profile-modal" class="modal">
+    <div id="settings-modal" class="modal">
         <div class="modal-content glass-panel">
-            <span class="close" onclick="document.getElementById('profile-modal').style.display='none'">&times;</span>
-            <img id="modal-avatar" src="https://ui-avatars.com/api/?name=User" alt="Avatar">
-            <h2 id="modal-username">Kullanıcı</h2>
-            <p id="modal-bio" style="font-style:italic; margin-bottom:15px;">Hakkımda bilgisi yok.</p>
-            <p style="font-size:12px; color:gray;">Son Görülme: <strong id="modal-lastseen">-</strong></p>
-            <button onclick="baslatDM(document.getElementById('modal-username').innerText)" class="modern-auth-btn" style="padding:10px;">Özel Mesaj Gönder 🕵️</button>
+            <span class="close" onclick="document.getElementById('settings-modal').style.display='none'">&times;</span>
+            <h2>⚙️ Ayarlar</h2>
+            <div class="input-wrapper"><input type="text" id="set-avatar" placeholder="Avatar Linki"></div>
+            <div class="input-wrapper"><input type="text" id="set-bio" placeholder="Biyografi"></div>
+            <div class="input-wrapper"><input type="text" id="set-bg" placeholder="Arka Plan Linki"></div>
+            <button onclick="saveSettings()" style="width:100%;" class="auth-btn">Kaydet</button>
+        </div>
+    </div>
+
+    <div id="profile-popup" class="modal">
+        <div class="modal-content glass-panel profile-card" style="text-align: center;">
+            <span class="close" onclick="document.getElementById('profile-popup').style.display='none'">&times;</span>
+            <img id="pop-avatar" src="" style="width:80px; border-radius:50%; margin:auto;">
+            <h2 id="pop-username">Kullanıcı Adı</h2>
+            <p id="pop-bio" style="font-style:italic;">Biyografi yükleniyor...</p>
+            <p id="pop-lastseen" style="font-size:11px; opacity:0.7;">👁 Son Görülme: -</p>
+            <button onclick="engelle(document.getElementById('pop-username').innerText)" class="auth-btn" style="background:#ff4757; margin-top:10px;">🚫 Engelle</button>
         </div>
     </div>
 
     <script src="/socket.io/socket.io.js"></script>
     <script>
         const socket = io();
-        let isim = "", oda = "";
-        let isLoginMode = true; 
-        let mediaRecorder, audioChunks = [], isRecording = false;
+        let isim = "", oda = "", myAvatarUrl = "", myBio = "";
+        let typingTimeout; let isMuted = false; let isLoginMode = true;
+        let mediaRecorder; let audioChunks = []; let isRecording = false;
+        
+        // YENİ: Engellenenler Listesi ve Kötü Kelime Filtresi
+        let blockedUsers = [];
+        let badWords = ["kötükelime", "küfür", "argo"];
 
-        // --- 1. GİRİŞ VE KAYIT SİSTEMİ ---
         function toggleAuthMode() {
             isLoginMode = !isLoginMode;
-            document.getElementById('auth-title').innerText = isLoginMode ? "Messenger'a Giriş" : "Hesap Oluştur";
-            document.getElementById('auth-desc').innerText = isLoginMode ? "Arkadaşlarınla anında bağlantı kur." : "Saniyeler içinde aramıza katıl.";
-            document.getElementById('auth-btn').innerText = isLoginMode ? "Devam Et" : "Kayıt Ol";
-            document.getElementById('auth-toggle-text').innerHTML = isLoginMode ? 'Hesabın yok mu? <a href="#" onclick="toggleAuthMode()" style="color:#0072ff; font-weight:bold;">Kaydol</a>' : 'Zaten hesabın var mı? <a href="#" onclick="toggleAuthMode()" style="color:#0072ff; font-weight:bold;">Giriş Yap</a>';
+            document.getElementById('auth-title').innerText = isLoginMode ? "Hoş Geldiniz 👋" : "Hesap Oluştur 🚀";
+            document.getElementById('auth-desc').innerText = isLoginMode ? "Devam etmek için giriş yapın." : "Hemen yeni bir hesap oluşturun.";
+            document.getElementById('auth-btn').innerText = isLoginMode ? "Giriş Yap" : "Kayıt Ol";
+            document.getElementById('auth-toggle-text').innerHTML = isLoginMode ? 'Hesabınız yok mu? <a href="#" onclick="toggleAuthMode()">Hesap Oluşturun</a>' : 'Zaten hesabınız var mı? <a href="#" onclick="toggleAuthMode()">Giriş Yapın</a>';
         }
 
         function authAction() {
@@ -109,194 +182,184 @@
                 isim = res.username;
                 document.getElementById('auth-overlay').style.display = 'none';
                 document.getElementById('app-layout').style.display = 'flex';
+                document.getElementById('my-username').innerText = isim;
                 socket.emit('get_lobbies');
             }
         });
 
-        // --- 2. ODA VE DM SİSTEMİ ---
+        // Odaya Girme ve Şifre
         function odayaKatil(roomName = null) {
-            const yeniOda = roomName || document.getElementById('room-input').value.trim();
-            if (!yeniOda) return;
+            const r = roomName || document.getElementById('room-input').value.trim();
+            const p = document.getElementById('room-pass') ? document.getElementById('room-pass').value.trim() : "";
+            if (!r) return;
             if (oda) socket.emit('leaveRoom', oda);
-            oda = yeniOda;
-            socket.emit('joinRoom', oda);
+            oda = r;
+            socket.emit('joinRoom', { room: oda, password: p, setPass: p !== "" ? p : null });
+        }
+
+        socket.on('room_error', (msg) => { alert(msg); oda = ""; });
+        socket.on('load_messages', (msgs) => {
+            document.getElementById('dashboard-area').style.display = 'none';
             document.getElementById('chat-area').style.display = 'flex';
             document.getElementById('right-sidebar').style.display = 'flex';
             document.getElementById('room-title').innerText = `Oda: ${oda}`;
             document.getElementById('messages').innerHTML = '';
-        }
-
-        function baslatDM(hedefKullanici) {
-            if(hedefKullanici === isim) return alert("Kendinize özel mesaj gönderemezsiniz.");
-            // İki ismin alfabetik sırasına göre standart özel oda ismi oluştur
-            const dmRoom = "DM_" + [isim, hedefKullanici].sort().join("_");
-            document.getElementById('profile-modal').style.display = 'none';
-            odayaKatil(dmRoom);
-        }
-
-        socket.on('update_lobbies', (rooms) => {
-            const list = document.getElementById('active-rooms');
-            list.innerHTML = rooms.length ? '' : '<p style="font-size:12px; text-align:center;">Aktif oda yok.</p>';
-            rooms.forEach(r => list.innerHTML += `<div style="padding:10px; background:rgba(0,0,0,0.1); border-radius:10px; cursor:pointer;" onclick="odayaKatil('${r.name}')"><strong>#${r.name}</strong> (${r.count} Kişi)</div>`);
+            document.getElementById('pinned-msg-container').style.display = 'none';
+            msgs.forEach(m => renderMessage(m));
         });
 
-        socket.on('room_users', (users) => {
-            const ul = document.getElementById('users-list');
-            ul.innerHTML = '';
-            users.forEach(u => {
-                ul.innerHTML += `<div class="user-info-card" onclick="profiliGor('${u}')">
-                    <img src="https://ui-avatars.com/api/?name=${u}&background=random" style="width:30px; border-radius:50%;">
-                    <span>${u} ${u === isim ? '(Sen)' : ''}</span>
-                </div>`;
-            });
-        });
+        function lobiyeDon() {
+            if(oda) socket.emit('leaveRoom', oda);
+            oda = "";
+            document.getElementById('chat-area').style.display = 'none';
+            document.getElementById('right-sidebar').style.display = 'none';
+            document.getElementById('dashboard-area').style.display = 'block';
+            socket.emit('get_lobbies');
+        }
 
-        // --- 3. MESAJLAŞMA SİSTEMİ VE AKILLI LİNKLER ---
+        // YENİ: Zengin Metin ve Argo Filtresi
+        function formatMessage(text) {
+            if(text.includes('<img') || text.includes('<video') || text.includes('<audio')) return text;
+            let res = text;
+            badWords.forEach(bw => { res = res.replace(new RegExp(bw, "gi"), "***"); });
+            res = res.replace(/```([\s\S]*?)```/g, '<pre><code>$1</code></pre>'); // Kod
+            res = res.replace(/\*(.*?)\*/g, '<b>$1</b>'); // Kalın
+            res = res.replace(/_(.*?)_/g, '<i>$1</i>'); // İtalik
+            res = res.replace(/@(\w+)/g, '<span class="mention">@$1</span>'); // Bahsetme
+            res = res.replace(/(https?:\/\/[^\s]+)/g, "<a href='$1' target='_blank' style='color:#2575fc'>$1</a>");
+            return res;
+        }
+
         function gonder() {
             const input = document.getElementById('msg');
+            const isFlash = document.getElementById('flash-check').checked;
             let m = input.value.trim();
             if(m !== "") {
-                socket.emit('send_message', { room: oda, user: isim, message: m });
+                socket.emit('send_message', { room: oda, user: isim, message: m, isFlash: isFlash });
                 input.value = '';
                 socket.emit('typing', { isTyping: false });
             }
         }
+        function hizliYanit(txt) { document.getElementById('msg').value = txt; gonder(); }
 
-        function yaziyor() { socket.emit('typing', { isTyping: true }); setTimeout(()=>socket.emit('typing',{isTyping:false}),2000); }
-        socket.on('user_typing', (data) => {
-            document.getElementById('typing-indicator').innerText = data.isTyping ? `${data.user} yazıyor...` : "";
-        });
-
-        // AKILLI LİNK DÖNÜŞTÜRÜCÜ
-        function formatMessage(text) {
-            if(text.includes('<img') || text.includes('<audio')) return text; // Medyaysa dokunma
-            return text.replace(/(https?:\/\/[^\s]+)/g, "<a href='$1' target='_blank'>$1</a>");
-        }
-
+        // YENİ: Modüler Mesaj Render (Ekstra butonlar ile)
         function renderMessage(data) {
+            if(blockedUsers.includes(data.user)) return; // Engelli ise gösterme
             const isMine = data.user === isim;
-            const formattedMsg = formatMessage(data.message);
-            
-            let actionsHTML = '';
-            if(isMine) {
-                actionsHTML = `<div class="msg-actions"><button onclick="mesajDuzenle(${data.id}, '${data.message.replace(/'/g, "\\'")}')" title="Düzenle">✏️</button><button onclick="mesajSil(${data.id})" title="Sil">🗑️</button></div>`;
-            } else {
-                actionsHTML = `<div class="msg-actions"><button onclick="mesajBegen(${data.id})" title="Beğen">❤️</button></div>`;
-            }
+            const pureText = data.message.replace(/<[^>]*>?/gm, '');
+
+            let actionsHTML = `
+                <div class="msg-actions">
+                    <button onclick="konus('${pureText.replace(/'/g, "\\'")}')" title="Sesli Oku">🔊</button>
+                    <button onclick="kopyala('${pureText.replace(/'/g, "\\'")}')" title="Kopyala">📋</button>
+                    <button onclick="ilet('${data.message.replace(/'/g, "\\'")}')" title="İlet">⏭️</button>
+                    <button onclick="sabitle('${data.message.replace(/'/g, "\\'")}')" title="Sabitle">📌</button>
+                    ${!isMine ? `<button onclick="mesajBegen(${data.id})" title="Beğen">❤️</button>` : ''}
+                    ${isMine && !data.isFlash ? `<button onclick="mesajSil(${data.id})" title="Sil">🗑️</button>` : ''}
+                </div>`;
 
             const msgHtml = `
-            <div class="message ${isMine ? 'mine' : 'other'}" id="msg-${data.id}" data-text="${data.message.toLowerCase()}">
-                <img src="https://ui-avatars.com/api/?name=${data.user}&background=random" class="msg-avatar" onclick="profiliGor('${data.user}')" title="Profili Gör">
+            <div class="message ${isMine ? 'mine' : 'other'} ${data.isFlash ? 'flash-msg' : ''}" id="msg-${data.id}">
+                <img src="${data.avatar_url || 'https://ui-avatars.com/api/?name='+data.user}" class="msg-avatar" onclick="profiliGor('${data.user}')">
                 <div class="msg-content">
                     <div class="msg-header"><span>${data.user}</span><span>${data.time || ''}</span></div>
-                    <div class="msg-bubble" id="bubble-${data.id}">${formattedMsg}
-                        <span class="like-badge ${data.likes > 0 ? 'show' : ''}" id="like-${data.id}">❤️ ${data.likes || 0}</span>
+                    <div class="msg-bubble" style="font-size: var(--msg-font-size, 14.5px);">
+                        ${data.isFlash ? '🧨 ' : ''}${formatMessage(data.message)}
+                        <span class="like-badge" id="like-${data.id}" style="${data.likes > 0 ? 'display:inline-block;' : 'display:none;'}">❤️ ${data.likes || 0}</span>
                     </div>
                 </div>
                 ${actionsHTML}
             </div>`;
+
             document.getElementById('messages').innerHTML += msgHtml;
-            document.getElementById('messages').scrollTop = document.getElementById('messages').scrollHeight;
+            
+            // Flaş Mesajı 10 saniye sonra sil
+            if(data.isFlash) setTimeout(() => { const el = document.getElementById(`msg-${data.id}`); if(el) el.remove(); }, 10000);
+            setTimeout(scrollToBottom, 50);
         }
 
         socket.on('receive_message', (data) => renderMessage(data));
-        socket.on('load_messages', (msgs) => { document.getElementById('messages').innerHTML=''; msgs.forEach(m => renderMessage(m)); });
-        socket.on('system_message', (msg) => {
-            document.getElementById('messages').innerHTML += `<div class="system-msg">${msg}</div>`;
-            document.getElementById('messages').scrollTop = document.getElementById('messages').scrollHeight;
-        });
+        socket.on('system_message', (msg) => { document.getElementById('messages').innerHTML += `<div class="system-msg">${msg}</div>`; scrollToBottom(); });
 
-        // --- 4. MESAJ İŞLEMLERİ (SİL, DÜZENLE, BEĞEN) ---
+        // YENİ: Eklenen Mesaj Araçları Fonksiyonları
         function mesajSil(id) { if(confirm("Mesaj silinsin mi?")) socket.emit('delete_message', id); }
         socket.on('message_deleted', (id) => { const el = document.getElementById('msg-'+id); if(el) el.remove(); });
-
-        function mesajDuzenle(id, oldText) {
-            if(oldText.includes('<img') || oldText.includes('<audio')) return alert("Medya dosyaları düzenlenemez.");
-            const newText = prompt("Mesajı düzenle:", oldText);
-            if(newText && newText !== oldText) socket.emit('edit_message', {id: id, newText: newText});
-        }
-        socket.on('message_edited', (data) => {
-            const bubble = document.getElementById('bubble-'+data.id);
-            if(bubble) {
-                // Sadece metni değiştir, beğeni badge'ini koru
-                const badge = bubble.querySelector('.like-badge');
-                bubble.innerHTML = formatMessage(data.newText) + (badge ? badge.outerHTML : '');
-            }
-        });
-
+        
         function mesajBegen(id) { socket.emit('like_message', id); }
         socket.on('message_liked', (data) => {
             const badge = document.getElementById('like-'+data.id);
-            if(badge) { badge.innerText = `❤️ ${data.likes}`; badge.classList.add('show'); }
+            if(badge) { badge.innerText = `❤️ ${data.likes}`; badge.style.display = 'inline-block'; }
         });
 
-        // --- 5. ARAMA VE DIŞA AKTARMA ---
-        function mesajAra() {
-            const term = document.getElementById('search-msg').value.toLowerCase();
-            document.querySelectorAll('.message').forEach(msg => {
-                const text = msg.getAttribute('data-text');
-                msg.style.display = text && text.includes(term) ? 'flex' : 'none';
-            });
+        function konus(text) { window.speechSynthesis.speak(new SpeechSynthesisUtterance(text)); }
+        function kopyala(text) { navigator.clipboard.writeText(text).then(() => alert("Kopyalandı!")); }
+        function ilet(text) {
+            const hedefOda = prompt("Bu mesajı hangi odaya iletmek istersiniz?");
+            if(hedefOda) socket.emit('send_message', { room: hedefOda, user: isim, message: `[İletildi]: ${text}` });
+        }
+        function sabitle(text) { socket.emit('pin_message', text); }
+        socket.on('message_pinned', (text) => {
+            document.getElementById('pinned-msg-container').style.display = 'flex';
+            document.getElementById('pinned-text').innerHTML = formatMessage(text);
+        });
+
+        function engelle(user) {
+            if(user === isim) return alert("Kendini engelleyemezsin.");
+            if(!blockedUsers.includes(user)) blockedUsers.push(user);
+            alert(`${user} engellendi.`);
+            document.getElementById('profile-popup').style.display = 'none';
         }
 
         function odaIndir() {
-            let chatText = `--- ${oda} Odası Sohbet Geçmişi ---\n\n`;
+            let chatText = `--- ${oda} Odası ---\n`;
             document.querySelectorAll('.message').forEach(msg => {
                 const user = msg.querySelector('.msg-header span:first-child').innerText;
-                const time = msg.querySelector('.msg-header span:last-child').innerText;
-                const text = msg.getAttribute('data-text'); // Saf metin
-                chatText += `[${time}] ${user}: ${text}\n`;
+                const text = msg.querySelector('.msg-bubble').innerText;
+                chatText += `${user}: ${text}\n`;
             });
-            const blob = new Blob([chatText], { type: 'text/plain' });
-            const url = window.URL.createObjectURL(blob);
-            const a = document.createElement('a'); a.href = url; a.download = `${oda}_Gecmis.txt`; a.click();
+            const a = document.createElement('a');
+            a.href = window.URL.createObjectURL(new Blob([chatText], { type: 'text/plain' }));
+            a.download = `${oda}_sohbet.txt`; a.click();
         }
 
-        // --- 6. PROFİL GÖRÜNTÜLEME ---
-        function profiliGor(username) { socket.emit('get_user_profile', username); }
+        // Profiller ve Dosyalar (Eski kodlarla entegre)
+        function profiliGor(user) { socket.emit('get_user_profile', user); }
         socket.on('show_user_profile', (data) => {
-            document.getElementById('modal-username').innerText = data.username;
-            document.getElementById('modal-bio').innerText = data.bio || 'Hakkımda bilgisi yok.';
-            document.getElementById('modal-lastseen').innerText = data.last_seen;
-            document.getElementById('modal-avatar').src = `https://ui-avatars.com/api/?name=${data.username}&background=random&size=128`;
-            document.getElementById('profile-modal').style.display = 'flex';
+            document.getElementById('pop-username').innerText = data.username;
+            document.getElementById('pop-bio').innerText = data.bio || 'Hakkımda bilgisi yok.';
+            document.getElementById('pop-lastseen').innerText = '👁 Son Görülme: ' + data.last_seen;
+            document.getElementById('pop-avatar').src = `https://ui-avatars.com/api/?name=${data.username}&background=random&size=128`;
+            document.getElementById('profile-popup').style.display = 'flex';
         });
 
-        // --- 7. MEDYA İŞLEMLERİ (RESİM & SES) ---
-        document.getElementById('image-upload').addEventListener('change', function(e) {
-            const file = e.target.files[0];
-            if (file) {
-                const reader = new FileReader();
-                reader.onload = (evt) => socket.emit('send_message', { room: oda, user: isim, message: `<img src="${evt.target.result}" style="max-width:200px; border-radius:10px;">` });
-                reader.readAsDataURL(file);
-            }
+        socket.on('update_lobbies', (rooms) => {
+            const list = document.getElementById('active-rooms');
+            list.innerHTML = rooms.length ? '' : '<p style="font-size:12px; text-align:center;">Aktif oda yok.</p>';
+            rooms.forEach(r => list.innerHTML += `<div style="padding:10px; background:rgba(0,0,0,0.1); border-radius:10px; cursor:pointer; margin-bottom:5px;" onclick="odayaKatil('${r.name}')"><strong>#${r.name}</strong> (${r.count} Kişi)</div>`);
         });
 
-        async function toggleAudioRecord() {
-            const btn = document.getElementById('mic-btn');
-            if (!isRecording) {
-                try {
-                    const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
-                    mediaRecorder = new MediaRecorder(stream);
-                    audioChunks = [];
-                    mediaRecorder.ondataavailable = e => audioChunks.push(e.data);
-                    mediaRecorder.onstop = () => {
-                        const audioBlob = new Blob(audioChunks, { type: 'audio/webm' });
-                        const reader = new FileReader();
-                        reader.readAsDataURL(audioBlob);
-                        reader.onloadend = () => socket.emit('send_message', { room: oda, user: isim, message: `<audio controls src="${reader.result}"></audio>` });
-                        stream.getTracks().forEach(track => track.stop());
-                    };
-                    mediaRecorder.start();
-                    isRecording = true;
-                    btn.classList.add('recording');
-                } catch(err) { alert("Mikrofon izni alınamadı!"); }
-            } else {
-                mediaRecorder.stop();
-                isRecording = false;
-                btn.classList.remove('recording');
-            }
+        socket.on('room_users', (users) => {
+            document.getElementById('online-count').innerText = `🟢 ${users.length} Çevrimiçi`;
+            const ul = document.getElementById('users-list');
+            ul.innerHTML = '';
+            users.forEach(u => ul.innerHTML += `<div class="user-info-card" onclick="profiliGor('${u}')"><span>${u}</span></div>`);
+        });
+
+        // Scroll
+        function checkScroll() {
+            const m = document.getElementById('messages');
+            const btn = document.getElementById('scroll-bottom-btn');
+            if (m.scrollHeight - m.scrollTop > m.clientHeight + 100) btn.style.display = 'flex';
+            else btn.style.display = 'none';
         }
+        function scrollToBottom() { const m = document.getElementById('messages'); m.scrollTop = m.scrollHeight; }
+        
+        function yaziyor() { socket.emit('typing', { isTyping: true }); clearTimeout(typingTimeout); typingTimeout = setTimeout(()=>socket.emit('typing',{isTyping:false}),2000); }
+        socket.on('user_typing', (data) => { document.getElementById('typing-indicator').innerText = data.isTyping && data.user !== isim ? `${data.user} yazıyor...` : ""; });
+
+        function openSettings() { document.getElementById('settings-modal').style.display = 'flex'; }
+        function closeSettings() { document.getElementById('settings-modal').style.display = 'none'; }
+        function cikisYap() { location.reload(); }
     </script>
 </body>
 </html>
